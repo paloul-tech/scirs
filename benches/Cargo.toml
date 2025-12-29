@@ -1,0 +1,75 @@
+[package]
+name = "scirs2-benchmarks"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description = "Comprehensive performance benchmarks for SciRS2 against SciPy"
+repository.workspace = true
+license.workspace = true
+
+[[bench]]
+name = "linalg_benchmarks"
+path = "linalg_benchmarks.rs"
+harness = false
+
+[[bench]]
+name = "scipy_comparison"
+path = "scipy_comparison.rs"
+harness = false
+
+[[bench]]
+name = "memory_efficiency"
+path = "memory_efficiency.rs"
+harness = false
+
+[[bench]]
+name = "numerical_stability"
+path = "numerical_stability.rs"
+harness = false
+
+[lints]
+workspace = true
+
+[dependencies]
+# SciRS2 modules
+scirs2-core = { workspace = true, features = ["parallel", "simd", "profiling", "memory_management"] }
+scirs2-linalg = { workspace = true, features = ["simd", "parallel"] }
+# scirs2-stats = { path = "../scirs2-stats" } # Temporarily disabled
+scirs2-fft = { workspace = true }
+# scirs2-optimize = { path = "../scirs2-optimize" } # Temporarily disabled
+scirs2-integrate = { workspace = true }
+# scirs2-cluster = { path = "../scirs2-cluster" } # Temporarily disabled
+# scirs2-interpolate = { path = "../scirs2-interpolate" } # Temporarily disabled
+
+# Benchmarking framework
+criterion = { workspace = true, features = ["html_reports"] }
+plotters = { workspace = true }
+
+# Array operations
+ndarray = { workspace = true }
+ndarray-rand = { workspace = true }
+
+# Random number generation
+rand = { workspace = true }
+rand_chacha = { workspace = true }
+
+# Scientific computing utilities
+num-traits = { workspace = true }
+approx = { workspace = true }
+
+# Profiling and timing
+instant = { workspace = true }
+
+# Serialization for results
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Optional Python integration for comparison
+pyo3 = { workspace = true, optional = true }
+
+[features]
+default = []
+python-comparison = ["pyo3"]
+
+[dev-dependencies]
+tempfile = { workspace = true }

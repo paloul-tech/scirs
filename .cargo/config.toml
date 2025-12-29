@@ -1,0 +1,9 @@
+# Platform-specific configuration
+# Note: OpenBLAS dependencies removed - using pure Rust OxiBLAS for BLAS/LAPACK operations
+
+# Linux: CUDA configuration (for GPU crates)
+[target.x86_64-unknown-linux-gnu]
+rustflags = [
+    "-L", "/usr/local/cuda/targets/x86_64-linux/lib",
+    "-L", "/usr/local/cuda/lib64"
+]
