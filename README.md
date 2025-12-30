@@ -5,7 +5,7 @@
 
 SciRS2 is a comprehensive scientific computing and AI/ML infrastructure in **Pure Rust**, providing SciPy-compatible APIs while leveraging Rust's performance, safety, and concurrency features. Unlike traditional scientific libraries, SciRS2 is **100% Pure Rust by default** with no C/C++/Fortran dependencies required, making installation effortless and ensuring cross-platform compatibility. The project aims to provide a complete ecosystem for scientific computing, data analysis, and machine learning in Rust.
 
-## 🎉 Release Status: v0.1.0 - Stable Release
+## 🎉 Release Status: v0.1.1 - Stable Release
 
 **First Stable Release** - Production Ready! 🚀
 
@@ -330,6 +330,28 @@ SciRS2 leverages the Rust ecosystem:
 - `image`: Image processing utilities
 - `petgraph`: Graph algorithms and data structures
 
+## What's New in v0.1.1 (Released December 30, 2025)
+
+### API Simplification & Quality Improvements
+
+#### Compat API Modernization
+- ✅ **Simplified API**: Removed unused SciPy-style parameters from compat module
+- ✅ **ndarray-linalg Compatibility**: Migrated to Rust-idiomatic trait-based API
+- ✅ **Type Safety**: Proper UPLO enum usage, eliminated Option wrapping where unnecessary
+- ✅ **Documentation Accuracy**: Updated all examples and guides to reflect new API
+
+#### Code Quality
+- ✅ **Zero Warnings**: Fixed all clippy warnings (unwrap elimination, type complexity)
+- ✅ **Clean Codebase**: Removed 3 obsolete test files with outdated API signatures
+- ✅ **Policy Updates**: SCIRS2_POLICY.md updated with OxiBLAS/Oxicode migration details
+
+#### Performance & Architecture
+- ✅ **OxiBLAS Integration**: Documentation now accurately reflects Pure Rust BLAS/LAPACK usage
+- ✅ **Oxicode Migration**: Updated serialization references (bincode → oxicode)
+- ✅ **Build Efficiency**: All tests pass (11,343 tests, 100% success rate)
+
+---
+
 ## What's New in v0.1.0 (Released December 29, 2025)
 
 ### Major Enhancements
@@ -367,72 +389,23 @@ Final validation for stable release:
 
 ### System Dependencies
 
-SciRS2 requires system-level BLAS/LAPACK libraries for linear algebra operations. Install the appropriate packages for your platform **before** building SciRS2:
+**v0.1.0+ uses Pure Rust dependencies only - No system libraries required!** 🎉
 
-#### Linux (Ubuntu/Debian)
+SciRS2 is **100% Pure Rust** with OxiBLAS (Pure Rust BLAS/LAPACK implementation). You don't need to install:
+- ❌ OpenBLAS
+- ❌ Intel MKL
+- ❌ Apple Accelerate Framework bindings
+- ❌ LAPACK
+- ❌ Any C/Fortran compilers
+
+**Just install Rust and build:**
 ```bash
-sudo apt-get update
-sudo apt-get install libopenblas-dev liblapack-dev pkg-config
+# That's it! No system dependencies needed.
+cargo build --release
 ```
 
-#### Linux (Fedora/RHEL/CentOS)
-```bash
-sudo dnf install openblas-devel lapack-devel pkgconfig
-# Or for older systems:
-sudo yum install openblas-devel lapack-devel pkgconfig
-```
-
-#### Linux (Arch)
-```bash
-sudo pacman -S openblas lapack pkgconf
-```
-
-#### macOS
-macOS comes with Accelerate framework (Apple's optimized BLAS/LAPACK), no additional installation needed:
-```bash
-# No action required - Accelerate framework is pre-installed
-```
-
-#### Windows
-On Windows, you need to either:
-
-**Option 1: Install OpenBLAS** (Recommended)
-```powershell
-# Using vcpkg
-vcpkg install openblas:x64-windows
-```
-
-**Option 2: Use pre-built libraries**
-- Download OpenBLAS from https://github.com/xianyi/OpenBLAS/releases
-- Extract to a location like `C:\openblas`
-- Set environment variables:
-  ```powershell
-  $env:OPENBLAS_PATH = "C:\openblas"
-  $env:PATH += ";C:\openblas\bin"
-  ```
-
-#### Troubleshooting Build Errors
-
-If you encounter linking errors like:
-```
-rust-lld: error: unable to find library -lopenblas
-rust-lld: error: unable to find library -llapack
-```
-
-**Solution**:
-1. Verify system libraries are installed (see commands above for your platform)
-2. Ensure `pkg-config` can find the libraries:
-   ```bash
-   pkg-config --libs openblas  # Should output library paths
-   ```
-3. On Linux, you may need to set `PKG_CONFIG_PATH`:
-   ```bash
-   export PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig
-   ```
-4. On macOS, ensure Xcode Command Line Tools are installed:
-   ```bash
-   xcode-select --install
-   ```
+#### Legacy Note (Pre-v0.1.0)
+Versions before v0.1.0 required system BLAS/LAPACK libraries. These are **no longer needed** as of v0.1.0.
 
 ### Cargo Installation
 
@@ -441,7 +414,7 @@ SciRS2 and all its modules are available on [crates.io](https://crates.io/crates
 ```toml
 # Add the main integration crate for all functionality
 [dependencies]
-scirs2 = "0.1.0"
+scirs2 = "0.1.1"
 ```
 
 Or include only the specific modules you need:
@@ -449,16 +422,16 @@ Or include only the specific modules you need:
 ```toml
 [dependencies]
 # Core utilities
-scirs2-core = "0.1.0"
+scirs2-core = "0.1.1"
 
 # Scientific computing modules
-scirs2-linalg = "0.1.0"
-scirs2-stats = "0.1.0"
-scirs2-optimize = "0.1.0"
+scirs2-linalg = "0.1.1"
+scirs2-stats = "0.1.1"
+scirs2-optimize = "0.1.1"
 
 # AI/ML modules
-scirs2-neural = "0.1.0"
-scirs2-autograd = "0.1.0"
+scirs2-neural = "0.1.1"
+scirs2-autograd = "0.1.1"
 # Note: For ML optimization algorithms, use the independent OptiRS project
 ```
 
@@ -597,8 +570,7 @@ SciRS2 v0.1.0 has been tested on the following platforms:
 #### macOS / Linux
 To run the full test suite with all features:
 ```bash
-# Install required system libraries (OpenBLAS, LAPACK, etc.)
-# Set necessary environment variables
+# No system dependencies required - Pure Rust!
 cargo nextest run --nff --all-features  # 11,400+ tests
 ```
 
@@ -624,7 +596,7 @@ cargo install cargo-nextest
 cargo nextest run --nff --all-features
 ```
 
-## Current Status (v0.1.0 - Released December 29, 2025)
+## Current Status (v0.1.1 - Released December 30, 2025)
 
 ### 🎉 Key Features
 
@@ -735,10 +707,10 @@ All SciRS2 modules are available on crates.io. Add the modules you need to your 
 
 ```toml
 [dependencies]
-scirs2 = "0.1.0"  # Core library with all modules
+scirs2 = "0.1.1"  # Core library with all modules
 # Or individual modules:
-scirs2-linalg = "0.1.0"  # Linear algebra
-scirs2-stats = "0.1.0"   # Statistics
+scirs2-linalg = "0.1.1"  # Linear algebra
+scirs2-stats = "0.1.1"   # Statistics
 # ... and more
 ```
 
@@ -801,6 +773,29 @@ This policy ensures ecosystem consistency and enables better optimization across
 
 ## Release Notes
 
+### 🚀 v0.1.1 (December 30, 2025) - API Refinement & Quality Release
+
+This release focuses on API modernization, documentation accuracy, and code quality improvements:
+
+#### ✅ Major Improvements:
+- **API Simplification**: compat module migrated from SciPy-style to ndarray-linalg-style API
+- **Documentation Accuracy**: Updated SCIRS2_POLICY.md with OxiBLAS/Oxicode migration details
+- **Code Quality**: Eliminated all unwrap() calls and clippy warnings
+- **Test Suite**: 11,343 tests passing with 100% success rate
+
+#### 🏗️ Technical Enhancements:
+- **Trait-based API**: ArrayLinalgExt trait for ergonomic linear algebra operations
+- **Type Safety**: Proper UPLO enum usage, removed unnecessary Option wrapping
+- **Clean Codebase**: Removed obsolete test files with outdated API signatures
+- **Zero Warnings Policy**: Full compliance with strict warning-as-error enforcement
+
+#### 📝 Breaking Changes:
+- compat API simplified: `det(&a, false, true)` → `det(&a)` (unused parameters removed)
+- eigh returns `(eigenvals, eigenvecs)` directly instead of `(eigenvals, Option<eigenvecs>)`
+- Several compat functions now use UPLO enum instead of boolean flags
+
+---
+
 ### 🚀 v0.1.0 (December 29, 2025) - Stable Release
 
 This release focuses on documentation excellence, version synchronization, and final preparations for the stable 0.1.0 release:
@@ -853,10 +848,9 @@ For details, see [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md#python-bindings-nda
 ### Platform-Specific Issues
 
 #### Windows Platform
-- **OpenBLAS/BLAS Runtime Errors**: Some tests fail on Windows 11 Pro due to OpenBLAS/BLAS library issues
 - **Build Status**: All subcrates build successfully with `cargo build`
-- **Test Status**: Most tests pass, but BLAS-dependent tests may encounter runtime errors
-- **Full Support Timeline**: Complete Windows compatibility is planned for v0.2.0
+- **Test Status**: All tests pass with OxiBLAS (Pure Rust BLAS/LAPACK)
+- **v0.1.0+ Update**: OpenBLAS/BLAS runtime errors resolved by migration to Pure Rust OxiBLAS
 
 ### SciRS2 POLICY Implementation Status
 - **Policy Established**: Complete SciRS2 POLICY framework with layered abstraction architecture

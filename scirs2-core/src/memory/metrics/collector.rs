@@ -8,9 +8,7 @@ use std::time::{Duration, Instant};
 
 use crate::memory::metrics::event::{MemoryEvent, MemoryEventType};
 use rand::rngs::StdRng;
-use rand::SeedableRng;
-
-use crate::random::Rng;
+use rand::{Rng, SeedableRng};
 #[cfg(feature = "memory_metrics")]
 #[cfg(feature = "serialization")]
 use serde::{Deserialize, Serialize};

@@ -453,6 +453,7 @@ pub fn check_probabilities_sum_to_one<S, D, A>(
 ) -> CoreResult<()>
 where
     S: crate::ndarray::Data,
+    S::Elem: Float,
     D: Dimension,
     S::Elem: Float + std::fmt::Display + ScalarOperand,
     A: Into<String> + std::string::ToString,

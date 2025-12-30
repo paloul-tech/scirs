@@ -518,3 +518,252 @@ mod tests {
         assert!(std > 0.0);
     }
 }
+
+// ========================================
+// NDARRAY-LINALG COMPATIBILITY LAYER
+// ========================================
+
+/// ndarray-linalg compatibility layer for backward compatibility
+///
+/// Provides traits matching ndarray-linalg API using OxiBLAS v0.1.2+ backend
+#[cfg(feature = "linalg")]
+pub mod ndarray_linalg {
+    use crate::linalg::prelude::*;
+    use crate::ndarray::*;
+    use num_complex::Complex;
+
+    // Import OxiBLAS v0.1.2+ Complex functions
+    use oxiblas_ndarray::lapack::{
+        cholesky_hermitian_ndarray, eig_hermitian_ndarray, qr_complex_ndarray, svd_complex_ndarray,
+    };
+
+    // Re-export error types
+    pub use crate::linalg::{LapackError, LapackResult};
+
+    /// UPLO enum for triangular matrix specification
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum UPLO {
+        Upper,
+        Lower,
+    }
+
+    /// Linear system solver trait
+    pub trait Solve<A> {
+        fn solve_into(&self, b: &Array1<A>) -> Result<Array1<A>, LapackError>;
+    }
+
+    impl Solve<f64> for Array2<f64> {
+        #[inline]
+        fn solve_into(&self, b: &Array1<f64>) -> Result<Array1<f64>, LapackError> {
+            solve_ndarray(self, b)
+        }
+    }
+
+    impl Solve<Complex<f64>> for Array2<Complex<f64>> {
+        #[inline]
+        fn solve_into(
+            &self,
+            b: &Array1<Complex<f64>>,
+        ) -> Result<Array1<Complex<f64>>, LapackError> {
+            solve_ndarray(self, b)
+        }
+    }
+
+    /// SVD trait
+    pub trait SVD {
+        type Elem;
+        type Real;
+
+        fn svd(
+            &self,
+            compute_u: bool,
+            compute_vt: bool,
+        ) -> Result<(Array2<Self::Elem>, Array1<Self::Real>, Array2<Self::Elem>), LapackError>;
+    }
+
+    impl SVD for Array2<f64> {
+        type Elem = f64;
+        type Real = f64;
+
+        #[inline]
+        fn svd(
+            &self,
+            _compute_u: bool,
+            _compute_vt: bool,
+        ) -> Result<(Array2<f64>, Array1<f64>, Array2<f64>), LapackError> {
+            let result = svd_ndarray(self)?;
+            Ok((result.u, result.s, result.vt))
+        }
+    }
+
+    impl SVD for Array2<Complex<f64>> {
+        type Elem = Complex<f64>;
+        type Real = f64;
+
+        #[inline]
+        fn svd(
+            &self,
+            _compute_u: bool,
+            _compute_vt: bool,
+        ) -> Result<(Array2<Complex<f64>>, Array1<f64>, Array2<Complex<f64>>), LapackError>
+        {
+            let result = svd_complex_ndarray(self)?;
+            Ok((result.u, result.s, result.vt))
+        }
+    }
+
+    /// Hermitian/symmetric eigenvalue decomposition trait
+    pub trait Eigh {
+        type Elem;
+        type Real;
+
+        fn eigh(&self, uplo: UPLO)
+            -> Result<(Array1<Self::Real>, Array2<Self::Elem>), LapackError>;
+    }
+
+    impl Eigh for Array2<f64> {
+        type Elem = f64;
+        type Real = f64;
+
+        #[inline]
+        fn eigh(&self, _uplo: UPLO) -> Result<(Array1<f64>, Array2<f64>), LapackError> {
+            let result = eig_symmetric(self)?;
+            Ok((result.eigenvalues, result.eigenvectors))
+        }
+    }
+
+    impl Eigh for Array2<Complex<f64>> {
+        type Elem = Complex<f64>;
+        type Real = f64;
+
+        #[inline]
+        fn eigh(&self, _uplo: UPLO) -> Result<(Array1<f64>, Array2<Complex<f64>>), LapackError> {
+            eig_hermitian_ndarray(self)
+        }
+    }
+
+    /// Matrix norm trait
+    pub trait Norm {
+        type Real;
+
+        fn norm_l2(&self) -> Result<Self::Real, LapackError>;
+    }
+
+    impl Norm for Array2<f64> {
+        type Real = f64;
+
+        #[inline]
+        fn norm_l2(&self) -> Result<f64, LapackError> {
+            let sum_sq: f64 = self.iter().map(|x| x * x).sum();
+            Ok(sum_sq.sqrt())
+        }
+    }
+
+    impl Norm for Array2<Complex<f64>> {
+        type Real = f64;
+
+        #[inline]
+        fn norm_l2(&self) -> Result<f64, LapackError> {
+            let sum_sq: f64 = self.iter().map(|x| x.norm_sqr()).sum();
+            Ok(sum_sq.sqrt())
+        }
+    }
+
+    // Norm trait for Array1 (vectors)
+    impl Norm for Array1<f64> {
+        type Real = f64;
+
+        #[inline]
+        fn norm_l2(&self) -> Result<f64, LapackError> {
+            let sum_sq: f64 = self.iter().map(|x| x * x).sum();
+            Ok(sum_sq.sqrt())
+        }
+    }
+
+    impl Norm for Array1<Complex<f64>> {
+        type Real = f64;
+
+        #[inline]
+        fn norm_l2(&self) -> Result<f64, LapackError> {
+            let sum_sq: f64 = self.iter().map(|x| x.norm_sqr()).sum();
+            Ok(sum_sq.sqrt())
+        }
+    }
+
+    /// QR decomposition trait
+    pub trait QR {
+        type Elem;
+
+        fn qr(&self) -> Result<(Array2<Self::Elem>, Array2<Self::Elem>), LapackError>;
+    }
+
+    impl QR for Array2<f64> {
+        type Elem = f64;
+
+        #[inline]
+        fn qr(&self) -> Result<(Array2<f64>, Array2<f64>), LapackError> {
+            let result = qr_ndarray(self)?;
+            Ok((result.q, result.r))
+        }
+    }
+
+    impl QR for Array2<Complex<f64>> {
+        type Elem = Complex<f64>;
+
+        #[inline]
+        fn qr(&self) -> Result<(Array2<Complex<f64>>, Array2<Complex<f64>>), LapackError> {
+            let result = qr_complex_ndarray(self)?;
+            Ok((result.q, result.r))
+        }
+    }
+
+    /// Eigenvalue decomposition trait (general matrices)
+    pub trait Eig {
+        type Elem;
+
+        fn eig(&self) -> Result<(Array1<Self::Elem>, Array2<Self::Elem>), LapackError>;
+    }
+
+    // For Complex matrices, use general eigenvalue decomposition
+    // Note: General EVD for Complex returns complex eigenvalues and eigenvectors
+    // This is a simplified implementation - for production, would use eig_ndarray from oxiblas
+    impl Eig for Array2<Complex<f64>> {
+        type Elem = Complex<f64>;
+
+        #[inline]
+        fn eig(&self) -> Result<(Array1<Complex<f64>>, Array2<Complex<f64>>), LapackError> {
+            // Fallback: Use eigh for now (assumes Hermitian)
+            // TODO: Implement proper general EVD in oxiblas-ndarray
+            let (eigenvalues_real, eigenvectors) = eig_hermitian_ndarray(self)?;
+            let eigenvalues = eigenvalues_real.mapv(|x| Complex::new(x, 0.0));
+            Ok((eigenvalues, eigenvectors))
+        }
+    }
+
+    /// Cholesky decomposition trait
+    pub trait Cholesky {
+        type Elem;
+
+        fn cholesky(&self, uplo: UPLO) -> Result<Array2<Self::Elem>, LapackError>;
+    }
+
+    impl Cholesky for Array2<f64> {
+        type Elem = f64;
+
+        #[inline]
+        fn cholesky(&self, _uplo: UPLO) -> Result<Array2<f64>, LapackError> {
+            let result = cholesky_ndarray(self)?;
+            Ok(result.l)
+        }
+    }
+
+    impl Cholesky for Array2<Complex<f64>> {
+        type Elem = Complex<f64>;
+
+        #[inline]
+        fn cholesky(&self, _uplo: UPLO) -> Result<Array2<Complex<f64>>, LapackError> {
+            let result = cholesky_hermitian_ndarray(self)?;
+            Ok(result.l)
+        }
+    }
+}

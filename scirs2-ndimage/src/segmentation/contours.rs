@@ -319,8 +319,7 @@ pub fn find_contours(
 
                 // Follow the border
                 let start_dir = if is_outer { 0 } else { 4 }; // Start from East for outer, West for hole
-                let border_points =
-                    follow_border(&mut labels, i, j, start_dir, nbd, is_outer)?;
+                let border_points = follow_border(&mut labels, i, j, start_dir, nbd, is_outer)?;
 
                 if !border_points.is_empty() {
                     // Apply approximation
@@ -442,8 +441,7 @@ fn follow_border(
             labels[[i, j]] = nbd;
         }
 
-        if !next_found || (next_i == start_i && next_j == start_j && i == start_i && j == start_j)
-        {
+        if !next_found || (next_i == start_i && next_j == start_j && i == start_i && j == start_j) {
             break;
         }
 
@@ -468,10 +466,7 @@ fn follow_border(
 }
 
 /// Apply contour approximation
-fn approximate_contour(
-    points: &[(i32, i32)],
-    method: ApproximationMethod,
-) -> Vec<(i32, i32)> {
+fn approximate_contour(points: &[(i32, i32)], method: ApproximationMethod) -> Vec<(i32, i32)> {
     match method {
         ApproximationMethod::None => points.to_vec(),
         ApproximationMethod::Simple => approximate_simple(points),
@@ -547,8 +542,10 @@ fn approximate_teh_chin(points: &[(i32, i32)], use_kcos: bool) -> Vec<(i32, i32)
         } else {
             // L1 distance-based curvature
             let direct_dist = ((p3.0 - p1.0).abs() + (p3.1 - p1.1).abs()) as f64;
-            let path_dist = ((p2.0 - p1.0).abs() + (p2.1 - p1.1).abs()
-                + (p3.0 - p2.0).abs() + (p3.1 - p2.1).abs()) as f64;
+            let path_dist = ((p2.0 - p1.0).abs()
+                + (p2.1 - p1.1).abs()
+                + (p3.0 - p2.0).abs()
+                + (p3.1 - p2.1).abs()) as f64;
 
             if path_dist > 0.0 {
                 curvatures[i] = 1.0 - direct_dist / path_dist;
@@ -906,9 +903,12 @@ mod tests {
             }
         }
 
-        let contours =
-            find_contours(&image.view(), RetrievalMode::External, ApproximationMethod::Simple)
-                .unwrap();
+        let contours = find_contours(
+            &image.view(),
+            RetrievalMode::External,
+            ApproximationMethod::Simple,
+        )
+        .unwrap();
 
         assert!(!contours.is_empty());
         assert!(contours[0].points.len() >= 4); // At least 4 corners
@@ -932,8 +932,12 @@ mod tests {
             }
         }
 
-        let contours =
-            find_contours(&image.view(), RetrievalMode::Tree, ApproximationMethod::None).unwrap();
+        let contours = find_contours(
+            &image.view(),
+            RetrievalMode::Tree,
+            ApproximationMethod::None,
+        )
+        .unwrap();
 
         // Should find at least 2 contours (outer and hole)
         assert!(contours.len() >= 1);
@@ -972,9 +976,12 @@ mod tests {
     fn test_empty_image() {
         let image = Array2::<u8>::zeros((10, 10));
 
-        let contours =
-            find_contours(&image.view(), RetrievalMode::List, ApproximationMethod::Simple)
-                .unwrap();
+        let contours = find_contours(
+            &image.view(),
+            RetrievalMode::List,
+            ApproximationMethod::Simple,
+        )
+        .unwrap();
 
         assert!(contours.is_empty());
     }

@@ -54,9 +54,9 @@ unwrap_used = "warn"
 expect_used = "allow"
 
 [workspace.package]
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
-authors = ["SciRS2 Team"]
+authors = ["COOLJAPAN OU (Team KitaSan)"]
 description = "A Rust port of SciPy with AI/ML extensions - Scientific Computing and AI Library"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/cool-japan/scirs"
@@ -100,7 +100,7 @@ cc = "1.2.51"  # Build-time C/C++/Objective-C compiler
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 # OxiCode - Modern successor to bin-code with SIMD optimization
-oxicode = { version = "0.1", features = ["serde", "simd"] }
+oxicode = { version = "0.1.1", features = ["serde", "simd"] }
 chrono = "0.4.42"
 
 # Python bindings (optional)
@@ -119,12 +119,12 @@ sprs = { version = "0.11.4", default-features = false }
 
 # OxiBLAS - Pure Rust BLAS/LAPACK implementation (replaces OpenBLAS)
 # Using crates.io 0.1 series for stable releases
-oxiblas = { version = "0.1", features = ["parallel"] }
-oxiblas-ndarray = { version = "0.1" }
-oxiblas-blas = { version = "0.1" }
-oxiblas-lapack = { version = "0.1" }
-oxiblas-core = { version = "0.1" }
-oxiblas-matrix = { version = "0.1" }
+oxiblas = { version = "0.1.2", features = ["parallel"] }
+oxiblas-ndarray = { version = "0.1.2" }
+oxiblas-blas = { version = "0.1.2" }
+oxiblas-lapack = { version = "0.1.2" }
+oxiblas-core = { version = "0.1.2" }
+oxiblas-matrix = { version = "0.1.2" }
 
 # DEPRECATED: OpenBLAS dependencies - replaced by OxiBLAS
 # ndarray-linalg = { version = "0.18.0", default-features = false }
@@ -156,7 +156,7 @@ hex = "0.4"
 digest = "0.10"
 data-encoding = "2.9"
 glob = "0.3"
-zip = "7.0"
+zip = { version = "6", default-features = false, features = ["deflate", "bzip2", "time", "zstd"] }
 dirs = "6.0.0"
 urlencoding = "2.1"
 url = "2.5.7"
@@ -308,35 +308,35 @@ eframe = { version = "0.33" }
 # Python integration (optional)
 
 # Base scirs2 crates
-scirs2-core = { version = "0.1.0", path = "./scirs2-core" }
-scirs2 = { version = "0.1.0", path = "./scirs2", default-features = false }
-scirs2-linalg = { version = "0.1.0", path = "./scirs2-linalg" }
-scirs2-integrate = { version = "0.1.0", path = "./scirs2-integrate" }
-scirs2-interpolate = { version = "0.1.0", path = "./scirs2-interpolate" }
-scirs2-optimize = { version = "0.1.0", path = "./scirs2-optimize" }
-scirs2-fft = { version = "0.1.0", path = "./scirs2-fft" }
-scirs2-stats = { version = "0.1.0", path = "./scirs2-stats" }
-scirs2-special = { version = "0.1.0", path = "./scirs2-special" }
-scirs2-signal = { version = "0.1.0", path = "./scirs2-signal" }
-scirs2-sparse = { version = "0.1.0", path = "./scirs2-sparse" }
-scirs2-spatial = { version = "0.1.0", path = "./scirs2-spatial" }
+scirs2-core = { version = "0.1.1", path = "./scirs2-core" }
+scirs2 = { version = "0.1.1", path = "./scirs2", default-features = false }
+scirs2-linalg = { version = "0.1.1", path = "./scirs2-linalg" }
+scirs2-integrate = { version = "0.1.1", path = "./scirs2-integrate" }
+scirs2-interpolate = { version = "0.1.1", path = "./scirs2-interpolate" }
+scirs2-optimize = { version = "0.1.1", path = "./scirs2-optimize" }
+scirs2-fft = { version = "0.1.1", path = "./scirs2-fft" }
+scirs2-stats = { version = "0.1.1", path = "./scirs2-stats" }
+scirs2-special = { version = "0.1.1", path = "./scirs2-special" }
+scirs2-signal = { version = "0.1.1", path = "./scirs2-signal" }
+scirs2-sparse = { version = "0.1.1", path = "./scirs2-sparse" }
+scirs2-spatial = { version = "0.1.1", path = "./scirs2-spatial" }
 
 # Advanced modules
-scirs2-cluster = { version = "0.1.0", path = "./scirs2-cluster" }
-scirs2-ndimage = { version = "0.1.0", path = "./scirs2-ndimage" }
-scirs2-io = { version = "0.1.0", path = "./scirs2-io" }
-scirs2-datasets = { version = "0.1.0", path = "./scirs2-datasets" }
+scirs2-cluster = { version = "0.1.1", path = "./scirs2-cluster" }
+scirs2-ndimage = { version = "0.1.1", path = "./scirs2-ndimage" }
+scirs2-io = { version = "0.1.1", path = "./scirs2-io" }
+scirs2-datasets = { version = "0.1.1", path = "./scirs2-datasets" }
 
 # AI/ML modules
-scirs2-neural = { version = "0.1.0", path = "./scirs2-neural" }
+scirs2-neural = { version = "0.1.1", path = "./scirs2-neural" }
 # scirs2-optim moved to independent OptiRS project
-scirs2-graph = { version = "0.1.0", path = "./scirs2-graph" }
-scirs2-transform = { version = "0.1.0", path = "./scirs2-transform" }
-scirs2-metrics = { version = "0.1.0", path = "./scirs2-metrics", default-features = false }
-scirs2-text = { version = "0.1.0", path = "./scirs2-text" }
-scirs2-vision = { version = "0.1.0", path = "./scirs2-vision" }
-scirs2-series = { version = "0.1.0", path = "./scirs2-series" }
-scirs2-autograd = { version = "0.1.0", path = "./scirs2-autograd" }
+scirs2-graph = { version = "0.1.1", path = "./scirs2-graph" }
+scirs2-transform = { version = "0.1.1", path = "./scirs2-transform" }
+scirs2-metrics = { version = "0.1.1", path = "./scirs2-metrics", default-features = false }
+scirs2-text = { version = "0.1.1", path = "./scirs2-text" }
+scirs2-vision = { version = "0.1.1", path = "./scirs2-vision" }
+scirs2-series = { version = "0.1.1", path = "./scirs2-series" }
+scirs2-autograd = { version = "0.1.1", path = "./scirs2-autograd" }
 
 
 [profile.release]
@@ -346,9 +346,24 @@ codegen-units = 1
 
 [profile.dev]
 opt-level = 0  # Reduced to prevent memory exhaustion
+debug = 1  # Line numbers only (not full debug info=2) - reduces binary size significantly
+split-debuginfo = "packed"  # Separate debug info into .dwp files (Linux/CUDA optimization)
+incremental = true  # Keep incremental compilation but consider cleaning periodically
+
+# Disable debug info for all dependencies to reduce target/ size dramatically
+[profile.dev.package."*"]
+debug = false
+strip = "debuginfo"
 
 [profile.test]
 opt-level = 0  # Reduced to prevent memory exhaustion during compilation
+debug = 1  # Line numbers only - reduces test binary size
+split-debuginfo = "packed"
+
+# Disable debug info for dependencies in test builds
+[profile.test.package."*"]
+debug = false
+strip = "debuginfo"
 
 [profile.bench]
 opt-level = 3

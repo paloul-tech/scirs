@@ -28,6 +28,6 @@ pub use self::graph_cuts::{graph_cuts, GraphCutsParams, InteractiveGraphCuts};
 
 // Contour finding (OpenCV-like findContours)
 pub use self::contours::{
-    draw_contours, find_contours, point_in_contour, ApproximationMethod, Contour,
-    ContourHierarchy, ContourMoments, RetrievalMode,
+    draw_contours, find_contours, point_in_contour, ApproximationMethod, Contour, ContourHierarchy,
+    ContourMoments, RetrievalMode,
 };

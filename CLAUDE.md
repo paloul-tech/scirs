@@ -309,13 +309,13 @@ gpu = ["scirs2-core/gpu"]
 The project uses GitHub Actions with:
 - Rust stable toolchain
 - cargo-nextest for testing
-- System dependencies: OpenBLAS, LAPACK, etc.
+- Pure Rust dependencies only (OxiBLAS, no system BLAS/LAPACK required since v0.1.0)
 - Zero warnings enforcement
 - Comprehensive test coverage
 
 ## Version Information
-- Current version: 0.1.0 (Stable Release)
-- Release date: December 29, 2025
+- Current version: 0.1.1 (Stable Release)
+- Release date: December 30, 2025
 - Repository: https://github.com/cool-japan/scirs
 - Main branch: master
 - ML Optimization: Independent [OptiRS](https://github.com/cool-japan/optirs) project

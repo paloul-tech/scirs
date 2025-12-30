@@ -48,9 +48,9 @@
 //! Add to your `Cargo.toml`:
 //! ```toml
 //! [dependencies]
-//! scirs2-linalg = "0.1.0"
+//! scirs2-linalg = "0.1.1"
 //! # Optional features
-//! scirs2-linalg = { version = "0.1.0", features = ["simd", "parallel", "gpu"] }
+//! scirs2-linalg = { version = "0.1.1", features = ["simd", "parallel", "gpu"] }
 //! ```
 //!
 //! ### Basic Matrix Operations
@@ -209,16 +209,19 @@
 //!
 //! ## 🔒 Version Information
 //!
-//! - **Version**: 0.1.0
-//! - **Release Date**: December 29, 2025
+//! - **Version**: 0.1.1
+//! - **Release Date**: December 30, 2025
 //! - **MSRV** (Minimum Supported Rust Version): 1.70.0
 //! - **Documentation**: [docs.rs/scirs2-linalg](https://docs.rs/scirs2-linalg)
 //! - **Repository**: [github.com/cool-japan/scirs](https://github.com/cool-japan/scirs)
-// Note: BLAS/LAPACK functionality is provided through ndarray-linalg from scirs2-core
+// Note: BLAS/LAPACK functionality is provided through OxiBLAS (Pure Rust) from scirs2-core
 
 // Export error types
 pub mod error;
 pub use error::{LinalgError, LinalgResult};
+
+// Backward compatibility layer for ndarray-linalg-style API
+pub mod compat;
 
 // Basic modules
 pub mod attention;
@@ -304,7 +307,6 @@ pub mod gpu;
 pub mod autograd;
 
 // SciPy-compatible API wrappers
-pub mod compat;
 pub mod compat_wrappers;
 
 // Accelerated implementations using BLAS/LAPACK

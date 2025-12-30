@@ -18,7 +18,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let a = array![[1.0, 2.0], [3.0, 4.0]];
     println!("Matrix A = \n{:8.6}", a);
 
-    let (z, t) = compat::schur(&a.view(), "real", None, false, None, true)?;
+    let (z, t) = compat::schur(&a.view())?;
     println!("Orthogonal matrix Z = \n{:8.6}", z);
     println!("Upper triangular T = \n{:8.6}", t);
 
@@ -45,8 +45,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let symmetric = array![[2.0, 1.0], [1.0, 3.0]];
     println!("Symmetric matrix A = \n{:8.6}", symmetric);
 
-    let (z_sym, t_sym): (Array2<f64>, Array2<f64>) =
-        compat::schur(&symmetric.view(), "real", None, false, None, true)?;
+    let (z_sym, t_sym): (Array2<f64>, Array2<f64>) = compat::schur(&symmetric.view())?;
     println!("Z = \n{:8.6}", z_sym);
     println!("T = \n{:8.6}", t_sym);
 
@@ -66,7 +65,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let large = array![[1.0, 2.0, 3.0], [0.0, 4.0, 5.0], [0.0, 0.0, 6.0]];
     println!("Upper triangular matrix A = \n{:8.6}", large);
 
-    let (z_large, t_large) = compat::schur(&large.view(), "real", None, false, None, true)?;
+    let (z_large, t_large) = compat::schur(&large.view())?;
     println!("Z = \n{:8.6}", z_large);
     println!("T = \n{:8.6}", t_large);
 
@@ -84,7 +83,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let scipymatrix = array![[2.0, -1.0], [1.0, 0.0]];
     println!("Matrix A = \n{:8.6}", scipymatrix);
 
-    let (z_scipy, t_scipy) = compat::schur(&scipymatrix.view(), "real", None, false, None, true)?;
+    let (z_scipy, t_scipy) = compat::schur(&scipymatrix.view())?;
     println!("Z (via SciPy interface) = \n{:8.6}", z_scipy);
     println!("T (via SciPy interface) = \n{:8.6}", t_scipy);
 
@@ -105,7 +104,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let eigmatrix = array![[5.0, 1.0], [0.0, 3.0]];
     println!("Matrix A = \n{:8.6}", eigmatrix);
 
-    let (_, t_eig) = compat::schur(&eigmatrix.view(), "real", None, false, None, true)?;
+    let (_, t_eig) = compat::schur(&eigmatrix.view())?;
     println!("Schur form T = \n{:8.6}", t_eig);
 
     // For upper triangular matrices, eigenvalues are the diagonal elements

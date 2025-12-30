@@ -218,16 +218,19 @@ fn test_slice_random_trait() {
     let mut data = vec![1, 2, 3, 4, 5];
     let original = data.clone();
 
-    let mut rng = Random::default();
+    // Use seeded RNG for deterministic behavior
+    use scirs2_core::random::SeedableRng;
+    let mut rng = Random::seed_from_u64(42);
 
     // Test shuffle method from SliceRandom trait (via Random wrapper)
     rng.shuffle(&mut data);
 
-    // Data should be shuffled (very unlikely to be in original order)
+    // With seed 42, the shuffle should produce a different order
+    // Note: This is now deterministic rather than probabilistic
     let is_shuffled = data != original;
     assert!(
         is_shuffled || data.len() < 3,
-        "Data should likely be shuffled"
+        "Data should be shuffled with seed 42"
     );
 
     // All original elements should still be present

@@ -73,10 +73,10 @@ fn basic_operations_migration() -> LinalgResult<()> {
     // Determinant
     println!("🔹 Determinant Calculation");
     println!("Python: det_a = linalg.det(a)");
-    println!("Rust (compat):  let det_a = compat::det(&a.view(), false, true)?;");
+    println!("Rust (compat):  let det_a = compat::det(&a.view())?;");
     println!("Rust (direct):  let det_a = det(&a.view(), None)?;");
 
-    let det_compat: f64 = compat::det(&a.view(), false, true)?;
+    let det_compat: f64 = compat::det(&a.view())?;
     let det_direct: f64 = det(&a.view(), None)?;
     println!("Results: {:.6} (both APIs give same result)", det_compat);
     assert!((det_compat - det_direct).abs() < 1e-10);
@@ -84,10 +84,10 @@ fn basic_operations_migration() -> LinalgResult<()> {
     // Matrix inverse
     println!("\n🔹 Matrix Inverse");
     println!("Python: inv_a = linalg.inv(a)");
-    println!("Rust (compat):  let inv_a = compat::inv(&a.view(), false, true)?;");
+    println!("Rust (compat):  let inv_a = compat::inv(&a.view())?;");
     println!("Rust (direct):  let inv_a = inv(&a.view(), None)?;");
 
-    let inv_compat = compat::inv(&a.view(), false, true)?;
+    let inv_compat = compat::inv(&a.view())?;
     let inv_direct = inv(&a.view(), None)?;
     println!("Both APIs produce equivalent results");
 

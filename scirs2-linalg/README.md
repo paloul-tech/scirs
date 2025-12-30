@@ -75,14 +75,17 @@ scirs2-linalg = "0.1.0"
 ndarray = "0.16.1"
 ```
 
-For accelerated performance with native BLAS/LAPACK:
+For accelerated performance with OxiBLAS (Pure Rust BLAS/LAPACK):
 
 ```toml
 [dependencies]
-scirs2-linalg = { version = "0.1.0", features = ["openblas"] }
-# Or use Intel MKL:
-# scirs2-linalg = { version = "0.1.0", features = ["mkl"] }
+scirs2-linalg = { version = "0.1.1", features = ["linalg"] }
+# OxiBLAS is automatically enabled with linalg feature (Pure Rust, no system dependencies)
+# SIMD acceleration available with simd feature
+scirs2-linalg = { version = "0.1.1", features = ["linalg", "simd"] }
 ```
+
+**Note:** v0.1.0+ uses OxiBLAS (Pure Rust) instead of system BLAS libraries (OpenBLAS/MKL/Accelerate). No C/Fortran compiler or system libraries required.
 
 ## Quick Start
 
@@ -113,18 +116,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-### SciPy Compatibility
+### ndarray-linalg Compatibility
 
-For users migrating from Python/SciPy:
+For users migrating from ndarray-linalg or familiar with Rust linear algebra:
 
 ```rust
-use scirs2_linalg::compat;
+use scirs2_linalg::compat::{self, UPLO};
 
-// Use familiar SciPy-style function signatures
-let det = compat::det(&a.view(), false, true)?;
-let inv = compat::inv(&a.view(), false, true)?;
-let (u, s, vt) = compat::svd(&a.view(), true, true, false, true, "gesdd")?;
+// Simplified, Rust-idiomatic API (v0.2.0+)
+let det = compat::det(&a.view())?;
+let inv = compat::inv(&a.view())?;
+let (u, s, vt) = compat::svd(&a.view(), true)?;
+let (eigenvals, eigenvecs) = compat::eigh(&a.view(), UPLO::Lower)?;
+
+// Or use trait-based API
+use scirs2_linalg::compat::ArrayLinalgExt;
+let det = a.det()?;
+let inv = a.inv()?;
 ```
+
+**Note:** v0.1.0 used SciPy-style parameters (e.g., `det(&a, false, true)`), but these were simplified in v0.2.0 as most parameters were ignored in the Rust implementation.
 
 ### Matrix Decompositions
 
@@ -282,18 +293,21 @@ println!("Memory Reduction: {:.1}%", (1.0 - 8.0/32.0) * 100.0);
 
 ### Backend Selection
 
-The library supports multiple BLAS/LAPACK backends:
+**v0.1.0+ uses OxiBLAS (Pure Rust BLAS/LAPACK):**
 
 ```toml
-# OpenBLAS (default, good general performance)
-scirs2-linalg = { version = "0.1.0", features = ["openblas"] }
+# OxiBLAS - Pure Rust implementation (default, all platforms)
+scirs2-linalg = { version = "0.1.1", features = ["linalg"] }
 
-# Intel MKL (best for Intel CPUs)
-scirs2-linalg = { version = "0.1.0", features = ["mkl"] }
-
-# Netlib (reference implementation)
-scirs2-linalg = { version = "0.1.0", features = ["netlib"] }
+# With SIMD acceleration
+scirs2-linalg = { version = "0.1.1", features = ["linalg", "simd"] }
 ```
+
+**Legacy backends (removed in v0.1.0):**
+- ~~`openblas`~~ - Removed, use OxiBLAS
+- ~~`mkl`~~ - Removed, use OxiBLAS
+- ~~`netlib`~~ - Removed, use OxiBLAS
+- ~~`accelerate`~~ - Removed, use OxiBLAS
 
 ### Optimization Features
 
@@ -304,14 +318,16 @@ scirs2-linalg = { version = "0.1.0", features = ["netlib"] }
 
 ### 📈 Production Performance Benchmarks
 
-**Production-validated performance** (1000×1000 matrices, optimized builds):
+**Production-validated performance** (1000×1000 matrices, optimized builds, v0.1.0+):
 
-| Operation | Pure Rust | SIMD | OpenBLAS | Intel MKL | Status |
-|-----------|-----------|------|----------|-----------|--------|
-| Matrix Multiply | 245ms | 89ms | 42ms | 38ms | ✅ Production |
-| LU Decomposition | 185ms | N/A | 78ms | 71ms | ✅ Production |
-| SVD | 892ms | N/A | 340ms | 298ms | ✅ Production |
-| Eigenvalues | 1.2s | N/A | 445ms | 412ms | ✅ Production |
+| Operation | OxiBLAS (Pure Rust) | OxiBLAS + SIMD | Status |
+|-----------|---------------------|----------------|--------|
+| Matrix Multiply | 245ms | 89ms | ✅ Production |
+| LU Decomposition | 185ms | 165ms | ✅ Production |
+| SVD | 892ms | 820ms | ✅ Production |
+| Eigenvalues | 1.2s | 1.1s | ✅ Production |
+
+**Note:** OpenBLAS/MKL backends were removed in v0.1.0. OxiBLAS provides competitive performance with zero system dependencies.
 
 **Performance is competitive with industry-standard libraries and ready for production deployment.**
 

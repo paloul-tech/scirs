@@ -66,6 +66,7 @@ sysinfo = { workspace = true, optional = true }  # System information gathering
 # Platform-specific dependencies for cross-platform validation are handled through feature gates
 
 # OxiBLAS - Pure Rust BLAS/LAPACK implementation (replaces OpenBLAS)
+# OxiBLAS v0.1.2+ supports Complex<f64> operations (SVD, Eigh, Solve)
 oxiblas-ndarray = { workspace = true, optional = true }
 oxiblas-blas = { workspace = true, optional = true }
 oxiblas-lapack = { workspace = true, optional = true }
@@ -158,7 +159,7 @@ all_ints = [] # Support for all integer types in zero-copy operations
 memory_compression = ["memory_efficient", "lz4", "zstd", "snap", "flate2", "bytemuck", "serde", "serde_json", "libc", "num_cpus"]  # Compressed memory-mapped arrays (SIMD-optimized)
 memory_metrics = ["memory_management", "serde", "serde_json"]  # Enhanced memory metrics tracking
 sysinfo = ["dep:sysinfo"]  # System information gathering
-serialization = ["serde", "serde_json"]  # Serialization support
+serialization = ["serde", "serde_json", "num-complex/serde"]  # Serialization support (includes Complex<T> serde)
 array = ["ndarray-rand"]  # Basic ndarray with random support (minimal dependencies)
 array_stats = ["array", "ndarray-stats"]  # Statistics operations on arrays
 array_io = ["array", "ndarray-npy"]  # Array I/O (save/load .npy files)
@@ -170,7 +171,7 @@ types = []  # Type conversion utilities
 ufuncs = []  # Universal Functions (ufuncs) system
 testing = ["tempfile", "serde", "serde_json", "quickcheck"]  # Testing framework for production systems
 benchmarking = ["testing", "serde", "serde_json"]  # Comprehensive benchmarking system
-linalg = ["array", "oxiblas-ndarray", "oxiblas-blas", "oxiblas-lapack"]  # Linear algebra with OxiBLAS (pure Rust)
+linalg = ["array", "oxiblas-ndarray", "oxiblas-blas", "oxiblas-lapack"]  # Linear algebra with OxiBLAS (pure Rust) with Complex support (v0.1.2+)
 # NOTE: OpenBLAS/Netlib/Accelerate features removed - using pure Rust OxiBLAS for all platforms
 array_protocol = []  # Array Protocol for third-party array implementations
 array_protocol_jit = ["array_protocol", "cranelift-module", "cranelift-jit", "cranelift-frontend"]  # JIT compilation for Array Protocol

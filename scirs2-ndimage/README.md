@@ -43,7 +43,7 @@
 ### Basic Installation
 ```toml
 [dependencies]
-scirs2-ndimage = "0.1.0"
+scirs2-ndimage = "0.1.1"
 ```
 
 ### Production Configuration (Recommended)
@@ -51,7 +51,7 @@ For maximum performance in production environments:
 
 ```toml
 [dependencies]
-scirs2-ndimage = { version = "0.1.0", features = ["parallel", "simd"] }
+scirs2-ndimage = { version = "0.1.1", features = ["parallel", "simd"] }
 ndarray = "0.16"  # Required for array operations
 ```
 

@@ -16,7 +16,7 @@
 
 ```toml
 [dependencies]
-scirs2-core = { version = "0.1.0", features = ["validation", "simd", "parallel"] }
+scirs2-core = { version = "0.1.1", features = ["validation", "simd", "parallel"] }
 ```
 
 ```rust
@@ -286,16 +286,16 @@ let processor = ChunkProcessor::new(&memory_mapped, ChunkSize::Adaptive);
 
 ```toml
 # Minimal scientific computing
-scirs2-core = { version = "0.1.0", features = ["validation"] }
+scirs2-core = { version = "0.1.1", features = ["validation"] }
 
 # High-performance CPU computing
-scirs2-core = { version = "0.1.0", features = ["validation", "simd", "parallel"] }
+scirs2-core = { version = "0.1.1", features = ["validation", "simd", "parallel"] }
 
 # GPU-accelerated computing
-scirs2-core = { version = "0.1.0", features = ["validation", "gpu", "cuda"] }
+scirs2-core = { version = "0.1.1", features = ["validation", "gpu", "cuda"] }
 
 # Full-featured development
-scirs2-core = { version = "0.1.0", features = ["all"] }
+scirs2-core = { version = "0.1.1", features = ["all"] }
 ```
 
 ### Available Features

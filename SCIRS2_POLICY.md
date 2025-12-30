@@ -8,26 +8,27 @@ This document establishes the foundational policies for the SciRS2 scientific co
 
 ### Part I: Ecosystem Architecture
 1. [Overview](#overview)
-2. [Dependency Abstraction Policy](#dependency-abstraction-policy)
-3. [Core Architectural Principles](#core-architectural-principles-1)
-4. [Implementation Guidelines](#implementation-guidelines)
-5. [Migration Strategy](#migration-strategy)
+2. [Pure Rust Migration (v0.1.0)](#pure-rust-migration-v010)
+3. [Dependency Abstraction Policy](#dependency-abstraction-policy)
+4. [Core Architectural Principles](#core-architectural-principles-1)
+5. [Implementation Guidelines](#implementation-guidelines)
+6. [Migration Strategy](#migration-strategy)
 
 ### Part II: Technical Policies
-6. [SIMD Operations Policy](#simd-operations-policy)
-7. [GPU Operations Policy](#gpu-operations-policy)
-8. [Parallel Processing Policy](#parallel-processing-policy)
-9. [BLAS Operations Policy](#blas-operations-policy)
-10. [Platform Detection Policy](#platform-detection-policy)
-11. [Performance Optimization Policy](#performance-optimization-policy)
-12. [Error Handling Policy](#error-handling-policy)
-13. [Memory Management Policy](#memory-management-policy)
+7. [SIMD Operations Policy](#simd-operations-policy)
+8. [GPU Operations Policy](#gpu-operations-policy)
+9. [Parallel Processing Policy](#parallel-processing-policy)
+10. [BLAS Operations Policy](#blas-operations-policy)
+11. [Platform Detection Policy](#platform-detection-policy)
+12. [Performance Optimization Policy](#performance-optimization-policy)
+13. [Error Handling Policy](#error-handling-policy)
+14. [Memory Management Policy](#memory-management-policy)
 
 ### Part III: Implementation
-14. [Refactoring Guidelines](#refactoring-guidelines)
-15. [Examples](#examples)
-16. [Enforcement](#enforcement)
-17. [Benefits](#benefits)
+15. [Refactoring Guidelines](#refactoring-guidelines)
+16. [Examples](#examples)
+17. [Enforcement](#enforcement)
+18. [Benefits](#benefits)
 
 ---
 
@@ -43,6 +44,45 @@ The scirs2-core crate serves as the central hub for all common functionality, op
 - **Portability**: Platform-specific code is isolated in core
 - **Version Control**: Only core manages external dependency versions
 - **Type Safety**: Prevents mixing external types with SciRS2 types
+
+## Pure Rust Migration (v0.1.0)
+
+**Major architectural changes in v0.1.0 (December 2025):**
+
+### OxiBLAS Migration - Pure Rust BLAS/LAPACK
+
+**REMOVED Dependencies:**
+- ❌ `ndarray-linalg` - Replaced with scirs2-linalg independent implementation
+- ❌ `openblas-src` / `blas-src` / `lapack-src` - System BLAS libraries
+- ❌ `accelerate-src` - macOS Accelerate Framework bindings
+- ❌ `intel-mkl-src` - Intel MKL bindings
+- ❌ `netlib-src` - Netlib reference implementation
+
+**ADDED Dependencies:**
+- ✅ `oxiblas-ndarray` v0.1.2+ - Pure Rust ndarray integration
+- ✅ `oxiblas-blas` v0.1.2+ - Pure Rust BLAS implementation
+- ✅ `oxiblas-lapack` v0.1.2+ - Pure Rust LAPACK implementation (supports Complex<f64>)
+
+**Benefits:**
+- 🚀 **Zero System Dependencies** - No need to install OpenBLAS, MKL, or system BLAS
+- 🔧 **Easy Cross-Compilation** - Pure Rust works on all platforms
+- 📦 **Simplified Builds** - No C/Fortran compiler required
+- 🔒 **Complete Control** - Full Rust ecosystem integration
+- ⚡ **SIMD Optimized** - Performance competitive with native BLAS
+
+### Oxicode Migration - SIMD-Optimized Serialization
+
+**REMOVED Dependencies:**
+- ❌ `bincode` - Generic binary serialization
+
+**ADDED Dependencies (COOLJAPAN Policy):**
+- ✅ `oxicode` v0.1.0+ - SIMD-optimized binary serialization
+- ✅ `oxicode_derive` - Derive macros for custom types
+
+**Benefits:**
+- ⚡ **SIMD Acceleration** - Up to 4x faster than bincode
+- 🎯 **Scientific Data Optimized** - Specialized for numeric arrays
+- 🔒 **Type Safe** - Compile-time serialization verification
 
 ## Dependency Abstraction Policy
 
@@ -70,11 +110,15 @@ ndarray = { workspace = true }           # ❌ Use scirs2-core instead
 ndarray-rand = { workspace = true }      # ❌ Use scirs2-core instead
 ndarray-stats = { workspace = true }     # ❌ Use scirs2-core instead
 ndarray-npy = { workspace = true }       # ❌ Use scirs2-core instead
-ndarray-linalg = { workspace = true }    # ❌ Use scirs2-core instead
+ndarray-linalg = { workspace = true }    # ❌ REMOVED v0.1.0 - scirs2-linalg independent implementation
 num-traits = { workspace = true }        # ❌ Use scirs2-core instead
 num-complex = { workspace = true }       # ❌ Use scirs2-core instead
 num-integer = { workspace = true }       # ❌ Use scirs2-core instead
 nalgebra = { workspace = true }          # ❌ Use scirs2-core instead
+bincode = { workspace = true }           # ❌ REMOVED v0.1.0 - Use oxicode instead (COOLJAPAN Policy)
+openblas-src = { workspace = true }      # ❌ REMOVED v0.1.0 - Use OxiBLAS instead
+blas-src = { workspace = true }          # ❌ REMOVED v0.1.0 - Use OxiBLAS instead
+lapack-src = { workspace = true }        # ❌ REMOVED v0.1.0 - Use OxiBLAS instead
 ```
 
 #### Required Core Dependency in Cargo.toml:
@@ -112,7 +156,8 @@ use scirs2_core::random::*;           // Complete rand + rand_distr functionalit
 // === Array Operations ===
 use scirs2_core::ndarray::*;          // Complete ndarray ecosystem
 // Includes: Array, Array1, Array2, ArrayView, array!, s!, azip! macros
-// Includes: ndarray-linalg, ndarray-stats, ndarray-npy when array feature enabled
+// Includes: ndarray-rand, ndarray-stats, ndarray-npy when array feature enabled
+// NOTE: ndarray-linalg removed v0.1.0 - scirs2-linalg provides independent implementation
 
 // === Numerical Traits ===
 use scirs2_core::numeric::*;          // num-traits, num-complex, num-integer
@@ -136,11 +181,14 @@ use scirs2_core::linalg::*;           // Linear algebra (nalgebra when needed)
 | `ndarray-rand` | `scirs2_core::ndarray` | Via `array` feature |
 | `ndarray-stats` | `scirs2_core::ndarray` | Via `array` feature |
 | `ndarray-npy` | `scirs2_core::ndarray` | Via `array` feature |
-| `ndarray-linalg` | `scirs2_core::ndarray` | Via `array` feature |
+| ~~`ndarray-linalg`~~ | N/A | **REMOVED** - scirs2-linalg provides independent implementation |
 | `num-traits` | `scirs2_core::numeric` | All traits |
 | `num-complex` | `scirs2_core::numeric` | Complex numbers |
 | `num-integer` | `scirs2_core::numeric` | Integer traits |
 | `nalgebra` | `scirs2_core::linalg` | When needed |
+| `oxiblas-*` | `scirs2_core::linalg` | Pure Rust BLAS/LAPACK (v0.1.0+) |
+| ~~`bincode`~~ | N/A | **REPLACED** by `oxicode` (SIMD-optimized) |
+| `oxicode` | Direct usage | COOLJAPAN Policy - Pure Rust serialization |
 ```
 
 ### Exception: SciRS2-Core Foundation Layer
@@ -337,20 +385,31 @@ scirs2-core = { workspace = true, features = ["parallel"] }
 
 ### Supported BLAS Backends
 
-- macOS: Accelerate Framework (default)
-- Linux/Windows: OpenBLAS (default)
-- Intel MKL (optional)
-- Netlib (fallback)
+**v0.1.0+ (Current):**
+- **All Platforms: OxiBLAS (Pure Rust BLAS/LAPACK)** - Default and recommended
+  - No system dependencies required
+  - Cross-compilation friendly
+  - Complete Rust ecosystem integration
+
+**Legacy (Removed in v0.1.0):**
+- ~~macOS: Accelerate Framework~~ **REMOVED**
+- ~~Linux/Windows: OpenBLAS~~ **REMOVED**
+- ~~Intel MKL~~ **REMOVED**
+- ~~Netlib~~ **REMOVED**
 
 ### Module Dependencies
 
 ```toml
-# CORRECT - Module Cargo.toml
+# CORRECT - Module Cargo.toml (v0.1.0+)
 [dependencies]
-scirs2-core = { workspace = true, features = ["blas"] }
+scirs2-core = { workspace = true, features = ["linalg"] }
+# OxiBLAS accessed through scirs2-core/linalg feature
 
-# INCORRECT - Direct BLAS dependency
+# INCORRECT - Direct BLAS dependency (FORBIDDEN)
 # openblas-src = "0.10"  # FORBIDDEN
+# blas-src = "0.10"      # FORBIDDEN
+# lapack-src = "0.10"    # FORBIDDEN
+# accelerate-src = "0.4" # FORBIDDEN - Use OxiBLAS instead
 ```
 
 ## Platform Detection Policy

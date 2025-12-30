@@ -335,7 +335,7 @@ impl DistancePool {
             // Initialize memory
             std::ptr::write_bytes(ptr, 0, size);
 
-            Ok(Box::from_raw(std::slice::from_raw_parts_mut(ptr, size)))
+            Ok(Box::from_raw(std::ptr::slice_from_raw_parts_mut(ptr, size)))
         }
     }
 
