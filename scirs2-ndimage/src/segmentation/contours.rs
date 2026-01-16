@@ -940,7 +940,7 @@ mod tests {
         .unwrap();
 
         // Should find at least 2 contours (outer and hole)
-        assert!(contours.len() >= 1);
+        assert!(!contours.is_empty());
     }
 
     #[test]

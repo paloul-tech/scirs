@@ -5,13 +5,14 @@
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use pyo3::types::{PyAny, PyDict};
-use scirs2_numpy::{PyArray1, PyArray2, PyArrayMethods};
-use scirs2_stats::tests::ttest::{ttest_1samp, ttest_ind, ttest_rel, Alternative};
+use scirs2_numpy::{PyArray1, PyArrayMethods};
+use scirs2_stats::tests::ttest::{ttest_1samp, ttest_ind, Alternative};
+use scirs2_stats::{pearsonr, covariance_simd};
 
 /// Compute descriptive statistics - uses optimized implementations
 /// Returns dict with mean, std, var, min, max, median, count
 #[pyfunction]
-fn describe_py(py: Python, data: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyAny>> {
+pub fn describe_py(py: Python, data: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyAny>> {
     let binding = data.readonly();
     let arr = binding.as_array();
     let n = arr.len();
@@ -121,7 +122,7 @@ fn describe_py(py: Python, data: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyAny
 }
 /// Calculate mean - optimized with 8-way unrolling and multiple accumulators
 #[pyfunction]
-fn mean_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
+pub fn mean_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     let n = arr.len();
@@ -150,7 +151,7 @@ fn mean_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
 /// Calculate standard deviation - optimized two-pass with multi-accumulator
 #[pyfunction]
 #[pyo3(signature = (data, ddof = 0))]
-fn std_py(data: &Bound<'_, PyArray1<f64>>, ddof: usize) -> PyResult<f64> {
+pub fn std_py(data: &Bound<'_, PyArray1<f64>>, ddof: usize) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     let n = arr.len();
@@ -209,7 +210,7 @@ fn std_py(data: &Bound<'_, PyArray1<f64>>, ddof: usize) -> PyResult<f64> {
 /// Calculate variance - optimized two-pass with multi-accumulator
 #[pyfunction]
 #[pyo3(signature = (data, ddof = 0))]
-fn var_py(data: &Bound<'_, PyArray1<f64>>, ddof: usize) -> PyResult<f64> {
+pub fn var_py(data: &Bound<'_, PyArray1<f64>>, ddof: usize) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     let n = arr.len();
@@ -267,7 +268,7 @@ fn var_py(data: &Bound<'_, PyArray1<f64>>, ddof: usize) -> PyResult<f64> {
 /// Calculate percentile using optimized partial sort
 /// q: percentile value (0-100)
 #[pyfunction]
-fn percentile_py(data: &Bound<'_, PyArray1<f64>>, q: f64) -> PyResult<f64> {
+pub fn percentile_py(data: &Bound<'_, PyArray1<f64>>, q: f64) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     let n = arr.len();
@@ -307,7 +308,7 @@ fn percentile_py(data: &Bound<'_, PyArray1<f64>>, q: f64) -> PyResult<f64> {
 }
 /// Calculate correlation coefficient
 #[pyfunction]
-fn correlation_py(
+pub fn correlation_py(
     x: &Bound<'_, PyArray1<f64>>,
     y: &Bound<'_, PyArray1<f64>>,
 ) -> PyResult<f64> {
@@ -322,7 +323,7 @@ fn correlation_py(
 /// Calculate covariance
 #[pyfunction]
 #[pyo3(signature = (x, y, ddof = 1))]
-fn covariance_py(
+pub fn covariance_py(
     x: &Bound<'_, PyArray1<f64>>,
     y: &Bound<'_, PyArray1<f64>>,
     ddof: usize,
@@ -336,7 +337,7 @@ fn covariance_py(
 }
 /// Calculate median using optimized partial sort (O(n) instead of O(n log n))
 #[pyfunction]
-fn median_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
+pub fn median_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     let n = arr.len();
@@ -370,7 +371,7 @@ fn median_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
 }
 /// Calculate interquartile range (IQR) using optimized partial sort
 #[pyfunction]
-fn iqr_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
+pub fn iqr_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     let n = arr.len();
@@ -420,7 +421,7 @@ fn iqr_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
 /// - alternative: "two-sided", "less", or "greater"
 #[pyfunction]
 #[pyo3(signature = (data, popmean, alternative = "two-sided"))]
-fn ttest_1samp_py(
+pub fn ttest_1samp_py(
     py: Python,
     data: &Bound<'_, PyArray1<f64>>,
     popmean: f64,
@@ -462,7 +463,7 @@ fn ttest_1samp_py(
 /// - alternative: "two-sided", "less", or "greater"
 #[pyfunction]
 #[pyo3(signature = (a, b, equal_var = true, alternative = "two-sided"))]
-fn ttest_ind_py(
+pub fn ttest_ind_py(
     py: Python,
     a: &Bound<'_, PyArray1<f64>>,
     b: &Bound<'_, PyArray1<f64>>,

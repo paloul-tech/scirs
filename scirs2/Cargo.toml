@@ -85,6 +85,7 @@ integrate = ["dep:scirs2-integrate"]
 interpolate = ["dep:scirs2-interpolate"]
 optimize = ["dep:scirs2-optimize"]
 fft = ["dep:scirs2-fft"]
+oxifft = ["fft", "scirs2-fft/oxifft"]  # High-performance Pure Rust FFT
 special = ["dep:scirs2-special"]
 signal = ["dep:scirs2-signal"]
 sparse = ["dep:scirs2-sparse"]

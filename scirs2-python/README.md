@@ -15,7 +15,7 @@ SciRS2-Python provides Python bindings for the SciRS2 scientific computing ecosy
 - **SciPy-Compatible APIs**: Familiar interface for Python scientists
 - **Zero-Copy Integration**: Efficient NumPy array interoperability
 - **BLAS/LAPACK Integration**: Hardware-accelerated linear algebra via system BLAS (OpenBLAS, Accelerate, MKL)
-- **FFTW Integration**: Competitive FFT performance on small-medium data
+- **OxiFFT Integration**: Pure Rust high-performance FFT with FFTW-compatible algorithms
 - **Hybrid Approach**: Use alongside NumPy/SciPy for optimal performance
 
 **Important**: SciRS2 is a **specialized tool** for type-safe complex statistical analysis, not a general-purpose NumPy/SciPy replacement. See [Performance Guide](#performance) for when to use scirs2 vs NumPy.
@@ -162,7 +162,7 @@ cov = scirs2.covariance_py(x, y, 1)
 
 ### FFT (`fft`)
 
-FFT operations use FFTW backend. Performance is **2-5x faster** than NumPy on small data (<2K samples), but NumPy is faster on large data (>32K samples).
+FFT operations use OxiFFT backend (Pure Rust, FFTW-compatible algorithms). Performance is **2-5x faster** than NumPy on small data (<2K samples), but NumPy is faster on large data (>32K samples).
 
 ```python
 import numpy as np
@@ -269,7 +269,7 @@ residual = decomp['residual']
 
 ## Performance
 
-**Benchmark Summary** (macOS Apple Silicon with Accelerate/FFTW):
+**Benchmark Summary** (macOS Apple Silicon with Accelerate/OxiFFT):
 - **Statistics**: **30.40x average speedup**, 85.3% win rate
 - **FFT**: **2.24x average speedup**, 53.3% win rate
 - **Linear Algebra**: **1.94x slower** (with proper BLAS), competitive on small matrices

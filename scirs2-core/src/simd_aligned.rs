@@ -111,6 +111,70 @@ impl<T> AlignedVec<T> {
         }
     }
 
+    /// Set an element at the specified index
+    ///
+    /// # Panics
+    /// Panics if `index` is out of bounds
+    pub fn set(&mut self, index: usize, value: T) {
+        assert!(
+            index < self.len,
+            "Index {} out of bounds for length {}",
+            index,
+            self.len
+        );
+        unsafe {
+            ptr::write(self.ptr.as_ptr().add(index), value);
+        }
+    }
+
+    /// Get an element at the specified index
+    ///
+    /// # Panics
+    /// Panics if `index` is out of bounds
+    pub fn get(&self, index: usize) -> &T {
+        assert!(
+            index < self.len,
+            "Index {} out of bounds for length {}",
+            index,
+            self.len
+        );
+        unsafe { &*self.ptr.as_ptr().add(index) }
+    }
+
+    /// Create an uninitialized aligned vector with specified capacity and length
+    ///
+    /// # Safety
+    /// The caller must initialize all elements before reading them
+    pub unsafe fn with_capacity_uninit(
+        capacity: usize,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
+        let mut vec = Self::with_capacity(capacity)?;
+        vec.len = capacity; // Set length without initializing
+        Ok(vec)
+    }
+
+    /// Fill the vector with copies of a value
+    pub fn fill(&mut self, value: T)
+    where
+        T: Copy,
+    {
+        for i in 0..self.len {
+            unsafe {
+                ptr::write(self.ptr.as_ptr().add(i), value);
+            }
+        }
+    }
+
+    /// Clear the vector, dropping all elements
+    pub fn clear(&mut self) {
+        for i in 0..self.len {
+            unsafe {
+                ptr::drop_in_place(self.ptr.as_ptr().add(i));
+            }
+        }
+        self.len = 0;
+    }
+
     /// Convert to a regular Vec
     pub fn to_vec(&self) -> Vec<T>
     where

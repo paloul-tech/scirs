@@ -5,17 +5,19 @@
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use pyo3::types::{PyAny, PyDict};
-use scirs2_numpy::{PyArray1, PyArray2, PyArrayMethods};
-use scirs2_core::{Array1, Array2, ndarray::ArrayView1};
-use scirs2_stats::tests::ttest::{ttest_1samp, ttest_ind, ttest_rel, Alternative};
+use scirs2_numpy::{PyArray1, PyArrayMethods};
+use scirs2_core::{Array1, ndarray::ArrayView1};
 use scirs2_stats::{
-    boxplot_stats, quartiles, quintiles, deciles, winsorized_mean, winsorized_variance,
-    QuantileInterpolation,
+    deciles,
+    QuantileInterpolation, sem_simd, percentile_range_simd, skewness_simd, kurtosis_simd,
+    pearson_r_simd, covariance_simd, moment_simd, mean_simd, std_simd, variance_simd,
+    shapiro_wilk, chi2_gof, one_way_anova, wilcoxon, mann_whitney, kruskal_wallis,
+    levene, bartlett, brown_forsythe, anderson_darling, dagostino_k2,
 };
 
 /// Compute deciles (10th, 20th, ..., 90th percentiles) of a dataset
 #[pyfunction]
-fn deciles_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyArray1<f64>>> {
+pub fn deciles_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyArray1<f64>>> {
     let binding = data.readonly();
     let arr = binding.as_array();
     let result = deciles::<f64>(&arr.view(), QuantileInterpolation::Linear)
@@ -27,7 +29,7 @@ fn deciles_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyArray1<f64>>> {
 /// Compute standard error of the mean (SEM)
 #[pyfunction]
 #[pyo3(signature = (data, ddof = 1))]
-fn sem_py(data: &Bound<'_, PyArray1<f64>>, ddof: usize) -> PyResult<f64> {
+pub fn sem_py(data: &Bound<'_, PyArray1<f64>>, ddof: usize) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     sem_simd::<f64, _>(&arr, ddof)
@@ -36,7 +38,7 @@ fn sem_py(data: &Bound<'_, PyArray1<f64>>, ddof: usize) -> PyResult<f64> {
 /// Compute the range between two percentiles
 #[pyfunction]
 #[pyo3(signature = (data, lower_pct, upper_pct, interpolation = "linear"))]
-fn percentile_range_py(
+pub fn percentile_range_py(
     data: &Bound<'_, PyArray1<f64>>,
     lower_pct: f64,
     upper_pct: f64,
@@ -52,7 +54,7 @@ fn percentile_range_py(
 /// Compute SIMD-optimized skewness (third standardized moment)
 #[pyfunction]
 #[pyo3(signature = (data, bias = false))]
-fn skewness_simd_py(data: &Bound<'_, PyArray1<f64>>, bias: bool) -> PyResult<f64> {
+pub fn skewness_simd_py(data: &Bound<'_, PyArray1<f64>>, bias: bool) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     skewness_simd::<f64, _>(&arr.view(), bias)
@@ -63,7 +65,7 @@ fn skewness_simd_py(data: &Bound<'_, PyArray1<f64>>, bias: bool) -> PyResult<f64
 /// Compute SIMD-optimized kurtosis (fourth standardized moment)
 #[pyfunction]
 #[pyo3(signature = (data, fisher = true, bias = false))]
-fn kurtosis_simd_py(
+pub fn kurtosis_simd_py(
     data: &Bound<'_, PyArray1<f64>>,
     fisher: bool,
     bias: bool,
@@ -77,7 +79,7 @@ fn kurtosis_simd_py(
 }
 /// Compute SIMD-optimized Pearson correlation coefficient
 #[pyfunction]
-fn pearson_r_simd_py(
+pub fn pearson_r_simd_py(
     x: &Bound<'_, PyArray1<f64>>,
     y: &Bound<'_, PyArray1<f64>>,
 ) -> PyResult<f64> {
@@ -93,7 +95,7 @@ fn pearson_r_simd_py(
 /// Compute SIMD-optimized covariance
 #[pyfunction]
 #[pyo3(signature = (x, y, ddof = 1))]
-fn covariance_simd_py(
+pub fn covariance_simd_py(
     x: &Bound<'_, PyArray1<f64>>,
     y: &Bound<'_, PyArray1<f64>>,
     ddof: usize,
@@ -110,7 +112,7 @@ fn covariance_simd_py(
 /// Compute SIMD-optimized nth statistical moment
 #[pyfunction]
 #[pyo3(signature = (data, moment_order, center = true))]
-fn moment_simd_py(
+pub fn moment_simd_py(
     data: &Bound<'_, PyArray1<f64>>,
     moment_order: usize,
     center: bool,
@@ -124,7 +126,7 @@ fn moment_simd_py(
 }
 /// Compute SIMD-optimized mean
 #[pyfunction]
-fn mean_simd_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
+pub fn mean_simd_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     mean_simd::<f64, _>(&arr.view())
@@ -135,7 +137,7 @@ fn mean_simd_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
 /// Compute SIMD-optimized standard deviation
 #[pyfunction]
 #[pyo3(signature = (data, ddof = 1))]
-fn std_simd_py(data: &Bound<'_, PyArray1<f64>>, ddof: usize) -> PyResult<f64> {
+pub fn std_simd_py(data: &Bound<'_, PyArray1<f64>>, ddof: usize) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     std_simd::<f64, _>(&arr.view(), ddof)
@@ -146,7 +148,7 @@ fn std_simd_py(data: &Bound<'_, PyArray1<f64>>, ddof: usize) -> PyResult<f64> {
 /// Compute SIMD-optimized variance
 #[pyfunction]
 #[pyo3(signature = (data, ddof = 1))]
-fn variance_simd_py(data: &Bound<'_, PyArray1<f64>>, ddof: usize) -> PyResult<f64> {
+pub fn variance_simd_py(data: &Bound<'_, PyArray1<f64>>, ddof: usize) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     variance_simd::<f64, _>(&arr.view(), ddof)
@@ -164,7 +166,7 @@ fn variance_simd_py(data: &Bound<'_, PyArray1<f64>>, ddof: usize) -> PyResult<f6
 /// Returns:
 /// - Dict with 'statistic' (W statistic) and 'pvalue'
 #[pyfunction]
-fn shapiro_py(py: Python, data: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyAny>> {
+pub fn shapiro_py(py: Python, data: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyAny>> {
     let binding = data.readonly();
     let arr = binding.as_array();
     let (statistic, pvalue) = shapiro_wilk(&arr.view())
@@ -188,7 +190,7 @@ fn shapiro_py(py: Python, data: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyAny>
 /// - Dict with 'statistic', 'pvalue', 'dof' (degrees of freedom)
 #[pyfunction]
 #[pyo3(signature = (observed, expected = None))]
-fn chisquare_py(
+pub fn chisquare_py(
     py: Python,
     observed: &Bound<'_, PyArray1<f64>>,
     expected: Option<&Bound<'_, PyArray1<f64>>>,
@@ -222,7 +224,7 @@ fn chisquare_py(
 /// - Dict with 'f_statistic', 'pvalue', 'df_between', 'df_within',
 ///   'ss_between', 'ss_within', 'ms_between', 'ms_within'
 #[pyfunction(signature = (*args))]
-fn f_oneway_py(
+pub fn f_oneway_py(
     py: Python,
     args: &Bound<'_, pyo3::types::PyTuple>,
 ) -> PyResult<Py<PyAny>> {
@@ -265,7 +267,7 @@ fn f_oneway_py(
 /// - Dict with 'statistic', 'pvalue'
 #[pyfunction]
 #[pyo3(signature = (x, y, zero_method = "wilcox", correction = true))]
-fn wilcoxon_py(
+pub fn wilcoxon_py(
     py: Python,
     x: &Bound<'_, PyArray1<f64>>,
     y: &Bound<'_, PyArray1<f64>>,
@@ -300,7 +302,7 @@ fn wilcoxon_py(
 /// - Dict with 'statistic', 'pvalue'
 #[pyfunction]
 #[pyo3(signature = (x, y, alternative = "two-sided", use_continuity = true))]
-fn mannwhitneyu_py(
+pub fn mannwhitneyu_py(
     py: Python,
     x: &Bound<'_, PyArray1<f64>>,
     y: &Bound<'_, PyArray1<f64>>,
@@ -333,7 +335,7 @@ fn mannwhitneyu_py(
 /// Returns:
 /// - Dict with 'statistic', 'pvalue'
 #[pyfunction(signature = (*args))]
-fn kruskal_py(
+pub fn kruskal_py(
     py: Python,
     args: &Bound<'_, pyo3::types::PyTuple>,
 ) -> PyResult<Py<PyAny>> {
@@ -369,7 +371,7 @@ fn kruskal_py(
 /// Returns:
 /// - Dict with 'statistic', 'pvalue'
 #[pyfunction(signature = (*args, center = "median", proportion_to_cut = 0.05))]
-fn levene_py(
+pub fn levene_py(
     py: Python,
     args: &Bound<'_, pyo3::types::PyTuple>,
     center: &str,
@@ -401,7 +403,7 @@ fn levene_py(
 /// Returns:
 /// - Dict with 'statistic', 'pvalue'
 #[pyfunction(signature = (*args))]
-fn bartlett_test_py(
+pub fn bartlett_test_py(
     py: Python,
     args: &Bound<'_, pyo3::types::PyTuple>,
 ) -> PyResult<Py<PyAny>> {
@@ -433,7 +435,7 @@ fn bartlett_test_py(
 /// Returns:
 /// - Dict with 'statistic', 'pvalue'
 #[pyfunction(signature = (*args))]
-fn brown_forsythe_py(
+pub fn brown_forsythe_py(
     py: Python,
     args: &Bound<'_, pyo3::types::PyTuple>,
 ) -> PyResult<Py<PyAny>> {
@@ -471,7 +473,7 @@ fn brown_forsythe_py(
 /// Returns:
 ///     Dictionary with 'statistic' and 'pvalue' keys
 #[pyfunction]
-fn anderson_darling_py(py: Python, x: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyAny>> {
+pub fn anderson_darling_py(py: Python, x: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyAny>> {
     let x_data = x.readonly();
     let x_arr = x_data.as_array();
     let (statistic, pvalue) = anderson_darling(&x_arr.view())
@@ -494,7 +496,7 @@ fn anderson_darling_py(py: Python, x: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<
 /// Returns:
 ///     Dictionary with 'statistic' and 'pvalue' keys
 #[pyfunction]
-fn dagostino_k2_py(py: Python, x: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyAny>> {
+pub fn dagostino_k2_py(py: Python, x: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyAny>> {
     let x_data = x.readonly();
     let x_arr = x_data.as_array();
     let (statistic, pvalue) = dagostino_k2(&x_arr.view())

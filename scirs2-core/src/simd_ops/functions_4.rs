@@ -989,4 +989,492 @@ impl SimdUnifiedOps for f32 {
         }
         a.mapv(|x| x.ln_1p())
     }
+
+    // ============================================================================
+    // ZERO-ALLOCATION SIMD OPERATIONS (Phase 1: ToRSh SIMD Performance Fix)
+    // ============================================================================
+
+    #[cfg(feature = "simd")]
+    fn simd_add_into(a: &[Self], b: &[Self], output: &mut [Self]) {
+        assert_eq!(a.len(), b.len(), "Input arrays must have same length");
+        assert_eq!(
+            a.len(),
+            output.len(),
+            "Output buffer must match input length"
+        );
+
+        let len = a.len();
+
+        #[cfg(target_arch = "x86_64")]
+        {
+            use std::arch::x86_64::*;
+
+            if is_x86_feature_detected!("avx2") {
+                unsafe {
+                    let mut i = 0;
+                    // Process 8 f32s at a time with AVX2
+                    while i + 8 <= len {
+                        let a_vec = _mm256_loadu_ps(a.as_ptr().add(i));
+                        let b_vec = _mm256_loadu_ps(b.as_ptr().add(i));
+                        let result_vec = _mm256_add_ps(a_vec, b_vec);
+                        _mm256_storeu_ps(output.as_mut_ptr().add(i), result_vec);
+                        i += 8;
+                    }
+                    // Handle remaining elements
+                    while i < len {
+                        *output.get_unchecked_mut(i) = *a.get_unchecked(i) + *b.get_unchecked(i);
+                        i += 1;
+                    }
+                }
+                return;
+            }
+        }
+
+        #[cfg(target_arch = "aarch64")]
+        {
+            use std::arch::aarch64::*;
+
+            if std::arch::is_aarch64_feature_detected!("neon") {
+                unsafe {
+                    let mut i = 0;
+                    // Process 4 f32s at a time with NEON
+                    while i + 4 <= len {
+                        let a_vec = vld1q_f32(a.as_ptr().add(i));
+                        let b_vec = vld1q_f32(b.as_ptr().add(i));
+                        let result_vec = vaddq_f32(a_vec, b_vec);
+                        vst1q_f32(output.as_mut_ptr().add(i), result_vec);
+                        i += 4;
+                    }
+                    // Handle remaining elements
+                    while i < len {
+                        *output.get_unchecked_mut(i) = *a.get_unchecked(i) + *b.get_unchecked(i);
+                        i += 1;
+                    }
+                }
+                return;
+            }
+        }
+
+        // Scalar fallback
+        for i in 0..len {
+            output[i] = a[i] + b[i];
+        }
+    }
+
+    #[cfg(not(feature = "simd"))]
+    fn simd_add_into(a: &[Self], b: &[Self], output: &mut [Self]) {
+        assert_eq!(a.len(), b.len(), "Input arrays must have same length");
+        assert_eq!(
+            a.len(),
+            output.len(),
+            "Output buffer must match input length"
+        );
+        for i in 0..a.len() {
+            output[i] = a[i] + b[i];
+        }
+    }
+
+    #[cfg(feature = "simd")]
+    fn simd_sub_into(a: &[Self], b: &[Self], output: &mut [Self]) {
+        assert_eq!(a.len(), b.len(), "Input arrays must have same length");
+        assert_eq!(
+            a.len(),
+            output.len(),
+            "Output buffer must match input length"
+        );
+
+        let len = a.len();
+
+        #[cfg(target_arch = "x86_64")]
+        {
+            use std::arch::x86_64::*;
+
+            if is_x86_feature_detected!("avx2") {
+                unsafe {
+                    let mut i = 0;
+                    while i + 8 <= len {
+                        let a_vec = _mm256_loadu_ps(a.as_ptr().add(i));
+                        let b_vec = _mm256_loadu_ps(b.as_ptr().add(i));
+                        let result_vec = _mm256_sub_ps(a_vec, b_vec);
+                        _mm256_storeu_ps(output.as_mut_ptr().add(i), result_vec);
+                        i += 8;
+                    }
+                    while i < len {
+                        *output.get_unchecked_mut(i) = *a.get_unchecked(i) - *b.get_unchecked(i);
+                        i += 1;
+                    }
+                }
+                return;
+            }
+        }
+
+        #[cfg(target_arch = "aarch64")]
+        {
+            use std::arch::aarch64::*;
+
+            if std::arch::is_aarch64_feature_detected!("neon") {
+                unsafe {
+                    let mut i = 0;
+                    while i + 4 <= len {
+                        let a_vec = vld1q_f32(a.as_ptr().add(i));
+                        let b_vec = vld1q_f32(b.as_ptr().add(i));
+                        let result_vec = vsubq_f32(a_vec, b_vec);
+                        vst1q_f32(output.as_mut_ptr().add(i), result_vec);
+                        i += 4;
+                    }
+                    while i < len {
+                        *output.get_unchecked_mut(i) = *a.get_unchecked(i) - *b.get_unchecked(i);
+                        i += 1;
+                    }
+                }
+                return;
+            }
+        }
+
+        for i in 0..len {
+            output[i] = a[i] - b[i];
+        }
+    }
+
+    #[cfg(not(feature = "simd"))]
+    fn simd_sub_into(a: &[Self], b: &[Self], output: &mut [Self]) {
+        assert_eq!(a.len(), b.len(), "Input arrays must have same length");
+        assert_eq!(
+            a.len(),
+            output.len(),
+            "Output buffer must match input length"
+        );
+        for i in 0..a.len() {
+            output[i] = a[i] - b[i];
+        }
+    }
+
+    #[cfg(feature = "simd")]
+    fn simd_mul_into(a: &[Self], b: &[Self], output: &mut [Self]) {
+        assert_eq!(a.len(), b.len(), "Input arrays must have same length");
+        assert_eq!(
+            a.len(),
+            output.len(),
+            "Output buffer must match input length"
+        );
+
+        let len = a.len();
+
+        #[cfg(target_arch = "x86_64")]
+        {
+            use std::arch::x86_64::*;
+
+            if is_x86_feature_detected!("avx2") {
+                unsafe {
+                    let mut i = 0;
+                    while i + 8 <= len {
+                        let a_vec = _mm256_loadu_ps(a.as_ptr().add(i));
+                        let b_vec = _mm256_loadu_ps(b.as_ptr().add(i));
+                        let result_vec = _mm256_mul_ps(a_vec, b_vec);
+                        _mm256_storeu_ps(output.as_mut_ptr().add(i), result_vec);
+                        i += 8;
+                    }
+                    while i < len {
+                        *output.get_unchecked_mut(i) = *a.get_unchecked(i) * *b.get_unchecked(i);
+                        i += 1;
+                    }
+                }
+                return;
+            }
+        }
+
+        #[cfg(target_arch = "aarch64")]
+        {
+            use std::arch::aarch64::*;
+
+            if std::arch::is_aarch64_feature_detected!("neon") {
+                unsafe {
+                    let mut i = 0;
+                    while i + 4 <= len {
+                        let a_vec = vld1q_f32(a.as_ptr().add(i));
+                        let b_vec = vld1q_f32(b.as_ptr().add(i));
+                        let result_vec = vmulq_f32(a_vec, b_vec);
+                        vst1q_f32(output.as_mut_ptr().add(i), result_vec);
+                        i += 4;
+                    }
+                    while i < len {
+                        *output.get_unchecked_mut(i) = *a.get_unchecked(i) * *b.get_unchecked(i);
+                        i += 1;
+                    }
+                }
+                return;
+            }
+        }
+
+        for i in 0..len {
+            output[i] = a[i] * b[i];
+        }
+    }
+
+    #[cfg(not(feature = "simd"))]
+    fn simd_mul_into(a: &[Self], b: &[Self], output: &mut [Self]) {
+        assert_eq!(a.len(), b.len(), "Input arrays must have same length");
+        assert_eq!(
+            a.len(),
+            output.len(),
+            "Output buffer must match input length"
+        );
+        for i in 0..a.len() {
+            output[i] = a[i] * b[i];
+        }
+    }
+
+    fn simd_div_into(a: &[Self], b: &[Self], output: &mut [Self]) {
+        assert_eq!(a.len(), b.len(), "Input arrays must have same length");
+        assert_eq!(
+            a.len(),
+            output.len(),
+            "Output buffer must match input length"
+        );
+        // Division doesn't benefit as much from SIMD due to higher latency
+        for i in 0..a.len() {
+            output[i] = a[i] / b[i];
+        }
+    }
+
+    #[cfg(feature = "simd")]
+    fn simd_add_inplace(a: &mut [Self], b: &[Self]) {
+        assert_eq!(a.len(), b.len(), "Arrays must have same length");
+
+        let len = a.len();
+
+        #[cfg(target_arch = "x86_64")]
+        {
+            use std::arch::x86_64::*;
+
+            if is_x86_feature_detected!("avx2") {
+                unsafe {
+                    let mut i = 0;
+                    while i + 8 <= len {
+                        let a_vec = _mm256_loadu_ps(a.as_ptr().add(i));
+                        let b_vec = _mm256_loadu_ps(b.as_ptr().add(i));
+                        let result_vec = _mm256_add_ps(a_vec, b_vec);
+                        _mm256_storeu_ps(a.as_mut_ptr().add(i), result_vec);
+                        i += 8;
+                    }
+                    while i < len {
+                        *a.get_unchecked_mut(i) += *b.get_unchecked(i);
+                        i += 1;
+                    }
+                }
+                return;
+            }
+        }
+
+        #[cfg(target_arch = "aarch64")]
+        {
+            use std::arch::aarch64::*;
+
+            if std::arch::is_aarch64_feature_detected!("neon") {
+                unsafe {
+                    let mut i = 0;
+                    while i + 4 <= len {
+                        let a_vec = vld1q_f32(a.as_ptr().add(i));
+                        let b_vec = vld1q_f32(b.as_ptr().add(i));
+                        let result_vec = vaddq_f32(a_vec, b_vec);
+                        vst1q_f32(a.as_mut_ptr().add(i), result_vec);
+                        i += 4;
+                    }
+                    while i < len {
+                        *a.get_unchecked_mut(i) += *b.get_unchecked(i);
+                        i += 1;
+                    }
+                }
+                return;
+            }
+        }
+
+        for i in 0..len {
+            a[i] += b[i];
+        }
+    }
+
+    #[cfg(not(feature = "simd"))]
+    fn simd_add_inplace(a: &mut [Self], b: &[Self]) {
+        assert_eq!(a.len(), b.len(), "Arrays must have same length");
+        for i in 0..a.len() {
+            a[i] += b[i];
+        }
+    }
+
+    fn simd_sub_inplace(a: &mut [Self], b: &[Self]) {
+        assert_eq!(a.len(), b.len(), "Arrays must have same length");
+        for i in 0..a.len() {
+            a[i] -= b[i];
+        }
+    }
+
+    #[cfg(feature = "simd")]
+    fn simd_mul_inplace(a: &mut [Self], b: &[Self]) {
+        assert_eq!(a.len(), b.len(), "Arrays must have same length");
+
+        let len = a.len();
+
+        #[cfg(target_arch = "x86_64")]
+        {
+            use std::arch::x86_64::*;
+
+            if is_x86_feature_detected!("avx2") {
+                unsafe {
+                    let mut i = 0;
+                    while i + 8 <= len {
+                        let a_vec = _mm256_loadu_ps(a.as_ptr().add(i));
+                        let b_vec = _mm256_loadu_ps(b.as_ptr().add(i));
+                        let result_vec = _mm256_mul_ps(a_vec, b_vec);
+                        _mm256_storeu_ps(a.as_mut_ptr().add(i), result_vec);
+                        i += 8;
+                    }
+                    while i < len {
+                        *a.get_unchecked_mut(i) *= *b.get_unchecked(i);
+                        i += 1;
+                    }
+                }
+                return;
+            }
+        }
+
+        #[cfg(target_arch = "aarch64")]
+        {
+            use std::arch::aarch64::*;
+
+            if std::arch::is_aarch64_feature_detected!("neon") {
+                unsafe {
+                    let mut i = 0;
+                    while i + 4 <= len {
+                        let a_vec = vld1q_f32(a.as_ptr().add(i));
+                        let b_vec = vld1q_f32(b.as_ptr().add(i));
+                        let result_vec = vmulq_f32(a_vec, b_vec);
+                        vst1q_f32(a.as_mut_ptr().add(i), result_vec);
+                        i += 4;
+                    }
+                    while i < len {
+                        *a.get_unchecked_mut(i) *= *b.get_unchecked(i);
+                        i += 1;
+                    }
+                }
+                return;
+            }
+        }
+
+        for i in 0..len {
+            a[i] *= b[i];
+        }
+    }
+
+    #[cfg(not(feature = "simd"))]
+    fn simd_mul_inplace(a: &mut [Self], b: &[Self]) {
+        assert_eq!(a.len(), b.len(), "Arrays must have same length");
+        for i in 0..a.len() {
+            a[i] *= b[i];
+        }
+    }
+
+    fn simd_div_inplace(a: &mut [Self], b: &[Self]) {
+        assert_eq!(a.len(), b.len(), "Arrays must have same length");
+        for i in 0..a.len() {
+            a[i] /= b[i];
+        }
+    }
+
+    fn simd_add_scalar_inplace(a: &mut [Self], scalar: Self) {
+        for x in a.iter_mut() {
+            *x += scalar;
+        }
+    }
+
+    fn simd_mul_scalar_inplace(a: &mut [Self], scalar: Self) {
+        for x in a.iter_mut() {
+            *x *= scalar;
+        }
+    }
+
+    #[cfg(feature = "simd")]
+    fn simd_fma_into(a: &[Self], b: &[Self], c: &[Self], output: &mut [Self]) {
+        assert_eq!(a.len(), b.len(), "Input arrays must have same length");
+        assert_eq!(a.len(), c.len(), "Input arrays must have same length");
+        assert_eq!(
+            a.len(),
+            output.len(),
+            "Output buffer must match input length"
+        );
+
+        let len = a.len();
+
+        #[cfg(target_arch = "x86_64")]
+        {
+            use std::arch::x86_64::*;
+
+            if is_x86_feature_detected!("fma") && is_x86_feature_detected!("avx2") {
+                unsafe {
+                    let mut i = 0;
+                    while i + 8 <= len {
+                        let a_vec = _mm256_loadu_ps(a.as_ptr().add(i));
+                        let b_vec = _mm256_loadu_ps(b.as_ptr().add(i));
+                        let c_vec = _mm256_loadu_ps(c.as_ptr().add(i));
+                        // FMA: a * b + c
+                        let result_vec = _mm256_fmadd_ps(a_vec, b_vec, c_vec);
+                        _mm256_storeu_ps(output.as_mut_ptr().add(i), result_vec);
+                        i += 8;
+                    }
+                    while i < len {
+                        *output.get_unchecked_mut(i) = a
+                            .get_unchecked(i)
+                            .mul_add(*b.get_unchecked(i), *c.get_unchecked(i));
+                        i += 1;
+                    }
+                }
+                return;
+            }
+        }
+
+        #[cfg(target_arch = "aarch64")]
+        {
+            use std::arch::aarch64::*;
+
+            if std::arch::is_aarch64_feature_detected!("neon") {
+                unsafe {
+                    let mut i = 0;
+                    while i + 4 <= len {
+                        let a_vec = vld1q_f32(a.as_ptr().add(i));
+                        let b_vec = vld1q_f32(b.as_ptr().add(i));
+                        let c_vec = vld1q_f32(c.as_ptr().add(i));
+                        // FMA: a * b + c
+                        let result_vec = vfmaq_f32(c_vec, a_vec, b_vec);
+                        vst1q_f32(output.as_mut_ptr().add(i), result_vec);
+                        i += 4;
+                    }
+                    while i < len {
+                        *output.get_unchecked_mut(i) = a
+                            .get_unchecked(i)
+                            .mul_add(*b.get_unchecked(i), *c.get_unchecked(i));
+                        i += 1;
+                    }
+                }
+                return;
+            }
+        }
+
+        for i in 0..len {
+            output[i] = a[i].mul_add(b[i], c[i]);
+        }
+    }
+
+    #[cfg(not(feature = "simd"))]
+    fn simd_fma_into(a: &[Self], b: &[Self], c: &[Self], output: &mut [Self]) {
+        assert_eq!(a.len(), b.len(), "Input arrays must have same length");
+        assert_eq!(a.len(), c.len(), "Input arrays must have same length");
+        assert_eq!(
+            a.len(),
+            output.len(),
+            "Output buffer must match input length"
+        );
+        for i in 0..a.len() {
+            output[i] = a[i].mul_add(b[i], c[i]);
+        }
+    }
 }

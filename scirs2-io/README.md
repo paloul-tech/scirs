@@ -52,14 +52,14 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-scirs2-io = "0.1.0"
+scirs2-io = "0.1.2"
 ```
 
 Enable specific features as needed:
 
 ```toml
 [dependencies]
-scirs2-io = { version = "0.1.0", features = ["hdf5", "async", "compression"] }
+scirs2-io = { version = "0.1.2", features = ["hdf5", "async", "compression"] }
 ```
 
 ### Available Features

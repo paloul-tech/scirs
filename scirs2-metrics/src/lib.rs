@@ -39,7 +39,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! scirs2-metrics = "0.1.0"
+//! scirs2-metrics = "0.1.2"
 //! ```
 //!
 //! ```rust,no_run
@@ -58,7 +58,7 @@
 //! let mse = mean_squared_error(&y_true_reg, &y_pred_reg).unwrap();
 //! ```
 //!
-//! ## 🔒 Version: 0.1.0 (December 29, 2025)
+//! ## 🔒 Version: 0.1.2 (January 15, 2026)
 //!
 //! # Classification Metrics
 //!

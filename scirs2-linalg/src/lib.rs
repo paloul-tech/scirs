@@ -48,9 +48,9 @@
 //! Add to your `Cargo.toml`:
 //! ```toml
 //! [dependencies]
-//! scirs2-linalg = "0.1.1"
+//! scirs2-linalg = "0.1.2"
 //! # Optional features
-//! scirs2-linalg = { version = "0.1.1", features = ["simd", "parallel", "gpu"] }
+//! scirs2-linalg = { version = "0.1.2", features = ["simd", "parallel", "gpu"] }
 //! ```
 //!
 //! ### Basic Matrix Operations
@@ -209,8 +209,8 @@
 //!
 //! ## 🔒 Version Information
 //!
-//! - **Version**: 0.1.1
-//! - **Release Date**: December 30, 2025
+//! - **Version**: 0.1.2
+//! - **Release Date**: January 15, 2026
 //! - **MSRV** (Minimum Supported Rust Version): 1.70.0
 //! - **Documentation**: [docs.rs/scirs2-linalg](https://docs.rs/scirs2-linalg)
 //! - **Repository**: [github.com/cool-japan/scirs](https://github.com/cool-japan/scirs)
@@ -682,11 +682,11 @@ pub mod prelude {
         //!
         //! let a = array![[4.0, 2.0], [2.0, 3.0]];
         //!
-        //! // SciPy-style determinant computation
-        //! let det = scipy_compat::det(&a.view(), false, true).expect("Operation failed");
+        //! // SciPy-style determinant computation (simplified API)
+        //! let det = scipy_compat::det(&a.view()).expect("Operation failed");
         //!
-        //! // SciPy-style matrix norm
-        //! let norm = scipy_compat::norm(&a.view(), Some("fro"), None, false, true).expect("Operation failed");
+        //! // SciPy-style matrix norm (simplified API)
+        //! let norm = scipy_compat::norm(&a.view(), Some("fro")).expect("Operation failed");
         //! ```
 
         pub use super::super::compat::{

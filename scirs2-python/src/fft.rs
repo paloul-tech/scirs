@@ -10,44 +10,40 @@ use pyo3::prelude::*;
 
 // NumPy types for Python array interface (scirs2-numpy with native ndarray 0.17)
 // Complex64 from scirs2_numpy maps to NumPy's complex128 (cdouble)
-use scirs2_numpy::{IntoPyArray, PyArray1, PyArrayMethods, Complex64 as NumpyComplex64};
+use scirs2_numpy::{Complex64 as NumpyComplex64, IntoPyArray, PyArray1, PyArrayMethods};
 
 // ndarray types from scirs2-core
-use scirs2_core::{Array1, numeric::Complex64};
+use scirs2_core::{numeric::Complex64, Array1};
 
 // Direct imports from scirs2-fft (native ndarray 0.17 support)
-use scirs2_fft::{
-    dct, idct,
-    fftfreq, rfftfreq, fftshift, ifftshift, next_fast_len,
-    DCTType,
-};
+use scirs2_fft::{dct, fftfreq, fftshift, idct, ifftshift, next_fast_len, rfftfreq, DCTType};
 
-// Fallback imports for non-FFTW builds
-#[cfg(not(feature = "fftw"))]
+// Fallback imports for non-OxiFFT builds
+#[cfg(not(feature = "oxifft"))]
 use scirs2_fft::{fft, ifft, irfft};
 
 // ========================================
 // CORE FFT FUNCTIONS
 // ========================================
 
-/// 1D FFT (FFTW-optimized for f64!)
+/// 1D FFT (OxiFFT-optimized for f64!)
 /// Returns NumPy complex128 array (compatible with np.fft.fft output)
 #[pyfunction]
 fn fft_py(py: Python, data: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyArray1<NumpyComplex64>>> {
     let binding = data.readonly();
     let arr = binding.as_array();
 
-    // Use FFTW for f64 (much faster than pure Rust!)
-    #[cfg(feature = "fftw")]
+    // Use OxiFFT for f64 (Pure Rust high-performance!)
+    #[cfg(feature = "oxifft")]
     {
-        // Convert real input to complex for fft_fftw
+        // Convert real input to complex for fft_oxifft
         let complex_input: scirs2_core::ndarray::Array1<Complex64> = arr
             .iter()
             .map(|&r| Complex64::new(r, 0.0))
             .collect();
 
-        let result = scirs2_fft::fftw_backend::fft_fftw(&complex_input.view())
-            .map_err(|e| PyRuntimeError::new_err(format!("FFT (FFTW) failed: {}", e)))?;
+        let result = scirs2_fft::oxifft_backend::fft_oxifft(&complex_input.view())
+            .map_err(|e| PyRuntimeError::new_err(format!("FFT (OxiFFT) failed: {}", e)))?;
 
         // Convert to NumPy complex128 array
         let complex_result: Vec<NumpyComplex64> = result
@@ -59,7 +55,7 @@ fn fft_py(py: Python, data: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyArray1<N
     }
 
     // Fallback to pure Rust
-    #[cfg(not(feature = "fftw"))]
+    #[cfg(not(feature = "oxifft"))]
     {
         let vec_data: Vec<f64> = arr.to_vec();
 
@@ -76,7 +72,7 @@ fn fft_py(py: Python, data: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyArray1<N
     }
 }
 
-/// 1D inverse FFT (FFTW-optimized!)
+/// 1D inverse FFT (OxiFFT-optimized!)
 /// Accepts and returns NumPy complex128 arrays (compatible with np.fft.ifft)
 #[pyfunction]
 fn ifft_py(
@@ -86,8 +82,8 @@ fn ifft_py(
     let binding = data.readonly();
     let arr = binding.as_array();
 
-    // Use FFTW for f64 (much faster than pure Rust!)
-    #[cfg(feature = "fftw")]
+    // Use OxiFFT for f64 (Pure Rust high-performance!)
+    #[cfg(feature = "oxifft")]
     {
         // Convert NumPy complex to scirs2 Complex64
         let complex_input: scirs2_core::ndarray::Array1<Complex64> = arr
@@ -95,8 +91,8 @@ fn ifft_py(
             .map(|c| Complex64::new(c.re, c.im))
             .collect();
 
-        let result = scirs2_fft::fftw_backend::ifft_fftw(&complex_input.view())
-            .map_err(|e| PyRuntimeError::new_err(format!("IFFT (FFTW) failed: {}", e)))?;
+        let result = scirs2_fft::oxifft_backend::ifft_oxifft(&complex_input.view())
+            .map_err(|e| PyRuntimeError::new_err(format!("IFFT (OxiFFT) failed: {}", e)))?;
 
         // Convert back to NumPy complex128
         let complex_result: Vec<NumpyComplex64> = result
@@ -108,7 +104,7 @@ fn ifft_py(
     }
 
     // Fallback to pure Rust
-    #[cfg(not(feature = "fftw"))]
+    #[cfg(not(feature = "oxifft"))]
     {
         // Convert NumPy complex to Vec<Complex64>
         let complex_input: Vec<Complex64> = arr
@@ -129,18 +125,18 @@ fn ifft_py(
     }
 }
 
-/// Real FFT - FFT of real-valued input (FFTW-optimized!)
+/// Real FFT - FFT of real-valued input (OxiFFT-optimized!)
 /// Returns NumPy complex128 array (compatible with np.fft.rfft output)
 #[pyfunction]
 fn rfft_py(py: Python, data: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyArray1<NumpyComplex64>>> {
     let binding = data.readonly();
     let arr = binding.as_array();
 
-    // Use FFTW for f64 (FFTW + plan caching = faster than NumPy!)
-    #[cfg(feature = "fftw")]
+    // Use OxiFFT for f64 (OxiFFT + plan caching = high performance!)
+    #[cfg(feature = "oxifft")]
     {
-        let result = scirs2_fft::fftw_backend::rfft_fftw(&arr)
-            .map_err(|e| PyRuntimeError::new_err(format!("RFFT (FFTW) failed: {}", e)))?;
+        let result = scirs2_fft::oxifft_backend::rfft_oxifft(&arr)
+            .map_err(|e| PyRuntimeError::new_err(format!("RFFT (OxiFFT) failed: {}", e)))?;
 
         // Convert to NumPy complex128 array
         let complex_result: Vec<NumpyComplex64> = result
@@ -152,7 +148,7 @@ fn rfft_py(py: Python, data: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyArray1<
     }
 
     // Fallback to pure Rust
-    #[cfg(not(feature = "fftw"))]
+    #[cfg(not(feature = "oxifft"))]
     {
         let vec_data: Vec<f64> = arr.to_vec();
 
@@ -169,7 +165,7 @@ fn rfft_py(py: Python, data: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyArray1<
     }
 }
 
-/// Inverse real FFT (FFTW-optimized!)
+/// Inverse real FFT (OxiFFT-optimized!)
 /// Accepts NumPy complex128 array, returns real f64 array (compatible with np.fft.irfft)
 #[pyfunction]
 #[pyo3(signature = (data, n=None))]
@@ -181,8 +177,8 @@ fn irfft_py(
     let binding = data.readonly();
     let arr = binding.as_array();
 
-    // Use FFTW for f64 (much faster than pure Rust!)
-    #[cfg(feature = "fftw")]
+    // Use OxiFFT for f64 (Pure Rust high-performance!)
+    #[cfg(feature = "oxifft")]
     {
         // Convert NumPy complex to scirs2 Complex64
         let complex_input: scirs2_core::ndarray::Array1<Complex64> = arr
@@ -193,14 +189,14 @@ fn irfft_py(
         // Infer output size: if n is None, assume n = 2*(input_len - 1)
         let output_len = n.unwrap_or_else(|| 2 * (complex_input.len() - 1));
 
-        let result = scirs2_fft::fftw_backend::irfft_fftw(&complex_input.view(), output_len)
-            .map_err(|e| PyRuntimeError::new_err(format!("IRFFT (FFTW) failed: {}", e)))?;
+        let result = scirs2_fft::oxifft_backend::irfft_oxifft(&complex_input.view(), output_len)
+            .map_err(|e| PyRuntimeError::new_err(format!("IRFFT (OxiFFT) failed: {}", e)))?;
 
         Ok(result.into_pyarray(py).unbind())
     }
 
     // Fallback to pure Rust
-    #[cfg(not(feature = "fftw"))]
+    #[cfg(not(feature = "oxifft"))]
     {
         // Convert NumPy complex to Vec<Complex64>
         let complex_input: Vec<Complex64> = arr
@@ -219,19 +215,23 @@ fn irfft_py(
 // DCT FUNCTIONS
 // ========================================
 
-/// Discrete Cosine Transform (FFTW-optimized for Type 2!)
+/// Discrete Cosine Transform (OxiFFT-optimized for Type 2!)
 /// dct_type: 1, 2, 3, or 4
 #[pyfunction]
 #[pyo3(signature = (data, dct_type=2))]
-fn dct_py(py: Python, data: &Bound<'_, PyArray1<f64>>, dct_type: usize) -> PyResult<Py<PyArray1<f64>>> {
+fn dct_py(
+    py: Python,
+    data: &Bound<'_, PyArray1<f64>>,
+    dct_type: usize,
+) -> PyResult<Py<PyArray1<f64>>> {
     let binding = data.readonly();
     let arr = binding.as_array();
 
-    // Use FFTW for DCT Type 2 (most common)
-    #[cfg(feature = "fftw")]
+    // Use OxiFFT for DCT Type 2 (most common)
+    #[cfg(feature = "oxifft")]
     if dct_type == 2 {
-        let result = scirs2_fft::fftw_backend::dct2_fftw(&arr)
-            .map_err(|e| PyRuntimeError::new_err(format!("DCT-II (FFTW) failed: {}", e)))?;
+        let result = scirs2_fft::oxifft_backend::dct2_oxifft(&arr)
+            .map_err(|e| PyRuntimeError::new_err(format!("DCT-II (OxiFFT) failed: {}", e)))?;
         return Ok(result.into_pyarray(py).unbind());
     }
 
@@ -242,7 +242,12 @@ fn dct_py(py: Python, data: &Bound<'_, PyArray1<f64>>, dct_type: usize) -> PyRes
         2 => DCTType::Type2,
         3 => DCTType::Type3,
         4 => DCTType::Type4,
-        _ => return Err(PyRuntimeError::new_err(format!("Invalid DCT type: {}", dct_type))),
+        _ => {
+            return Err(PyRuntimeError::new_err(format!(
+                "Invalid DCT type: {}",
+                dct_type
+            )))
+        }
     };
 
     let result = dct(&vec_data, Some(dct_type_enum), None)
@@ -251,19 +256,23 @@ fn dct_py(py: Python, data: &Bound<'_, PyArray1<f64>>, dct_type: usize) -> PyRes
     Ok(Array1::from_vec(result).into_pyarray(py).unbind())
 }
 
-/// Inverse Discrete Cosine Transform (FFTW-optimized for Type 2!)
+/// Inverse Discrete Cosine Transform (OxiFFT-optimized for Type 2!)
 /// dct_type: 1, 2, 3, or 4
 #[pyfunction]
 #[pyo3(signature = (data, dct_type=2))]
-fn idct_py(py: Python, data: &Bound<'_, PyArray1<f64>>, dct_type: usize) -> PyResult<Py<PyArray1<f64>>> {
+fn idct_py(
+    py: Python,
+    data: &Bound<'_, PyArray1<f64>>,
+    dct_type: usize,
+) -> PyResult<Py<PyArray1<f64>>> {
     let binding = data.readonly();
     let arr = binding.as_array();
 
-    // Use FFTW for IDCT Type 2 (most common)
-    #[cfg(feature = "fftw")]
+    // Use OxiFFT for IDCT Type 2 (most common)
+    #[cfg(feature = "oxifft")]
     if dct_type == 2 {
-        let result = scirs2_fft::fftw_backend::idct2_fftw(&arr)
-            .map_err(|e| PyRuntimeError::new_err(format!("IDCT-II (FFTW) failed: {}", e)))?;
+        let result = scirs2_fft::oxifft_backend::idct2_oxifft(&arr)
+            .map_err(|e| PyRuntimeError::new_err(format!("IDCT-II (OxiFFT) failed: {}", e)))?;
         return Ok(result.into_pyarray(py).unbind());
     }
 
@@ -274,7 +283,12 @@ fn idct_py(py: Python, data: &Bound<'_, PyArray1<f64>>, dct_type: usize) -> PyRe
         2 => DCTType::Type2,
         3 => DCTType::Type3,
         4 => DCTType::Type4,
-        _ => return Err(PyRuntimeError::new_err(format!("Invalid DCT type: {}", dct_type))),
+        _ => {
+            return Err(PyRuntimeError::new_err(format!(
+                "Invalid DCT type: {}",
+                dct_type
+            )))
+        }
     };
 
     let result = idct(&vec_data, Some(dct_type_enum), None)
@@ -284,24 +298,27 @@ fn idct_py(py: Python, data: &Bound<'_, PyArray1<f64>>, dct_type: usize) -> PyRe
 }
 
 // ========================================
-// 2D FFT FUNCTIONS (FFTW-optimized!)
+// 2D FFT FUNCTIONS (OxiFFT-optimized!)
 // ========================================
 
 /// 2D FFT - Returns NumPy complex128 2D array (compatible with np.fft.fft2)
 /// Optimized: Uses rfft2 + Hermitian symmetry to reconstruct full spectrum
 /// This avoids the slow real→complex conversion for the input
 #[pyfunction]
-fn fft2_py(py: Python, data: &Bound<'_, scirs2_numpy::PyArray2<f64>>) -> PyResult<Py<scirs2_numpy::PyArray2<NumpyComplex64>>> {
+fn fft2_py(
+    py: Python,
+    data: &Bound<'_, scirs2_numpy::PyArray2<f64>>,
+) -> PyResult<Py<scirs2_numpy::PyArray2<NumpyComplex64>>> {
     let binding = data.readonly();
     let arr = binding.as_array();
 
-    #[cfg(feature = "fftw")]
+    #[cfg(feature = "oxifft")]
     {
         let (rows, cols) = arr.dim();
 
         // Use rfft2 which is much faster for real input (no complex conversion needed)
-        let half_result = scirs2_fft::fftw_backend::rfft2_fftw(&arr)
-            .map_err(|e| PyRuntimeError::new_err(format!("FFT2 (FFTW) failed: {}", e)))?;
+        let half_result = scirs2_fft::oxifft_backend::rfft2_oxifft(&arr)
+            .map_err(|e| PyRuntimeError::new_err(format!("FFT2 (OxiFFT) failed: {}", e)))?;
 
         // Reconstruct full spectrum using Hermitian symmetry
         // rfft2 gives us columns 0 to cols/2, we need to fill cols/2+1 to cols-1
@@ -325,28 +342,33 @@ fn fft2_py(py: Python, data: &Bound<'_, scirs2_numpy::PyArray2<f64>>) -> PyResul
             }
         }
 
-        let result_array = scirs2_core::ndarray::Array2::from_shape_vec((rows, cols), full_result)
-            .map_err(|e| PyRuntimeError::new_err(format!("Shape error: {}", e)))?;
+        let result_array =
+            scirs2_core::ndarray::Array2::from_shape_vec((rows, cols), full_result)
+                .map_err(|e| PyRuntimeError::new_err(format!("Shape error: {}", e)))?;
 
         Ok(result_array.into_pyarray(py).unbind())
     }
 
-    #[cfg(not(feature = "fftw"))]
+    #[cfg(not(feature = "oxifft"))]
     {
-        Err(PyRuntimeError::new_err("FFT2 requires FFTW feature"))
+        let _ = arr;
+        Err(PyRuntimeError::new_err("FFT2 requires oxifft feature"))
     }
 }
 
 /// 2D real FFT - Returns NumPy complex128 2D array (compatible with np.fft.rfft2)
 #[pyfunction]
-fn rfft2_py(py: Python, data: &Bound<'_, scirs2_numpy::PyArray2<f64>>) -> PyResult<Py<scirs2_numpy::PyArray2<NumpyComplex64>>> {
+fn rfft2_py(
+    py: Python,
+    data: &Bound<'_, scirs2_numpy::PyArray2<f64>>,
+) -> PyResult<Py<scirs2_numpy::PyArray2<NumpyComplex64>>> {
     let binding = data.readonly();
     let arr = binding.as_array();
 
-    #[cfg(feature = "fftw")]
+    #[cfg(feature = "oxifft")]
     {
-        let result = scirs2_fft::fftw_backend::rfft2_fftw(&arr)
-            .map_err(|e| PyRuntimeError::new_err(format!("RFFT2 (FFTW) failed: {}", e)))?;
+        let result = scirs2_fft::oxifft_backend::rfft2_oxifft(&arr)
+            .map_err(|e| PyRuntimeError::new_err(format!("RFFT2 (OxiFFT) failed: {}", e)))?;
 
         // Convert to NumPy complex128 2D array
         let (rows, cols) = result.dim();
@@ -355,15 +377,17 @@ fn rfft2_py(py: Python, data: &Bound<'_, scirs2_numpy::PyArray2<f64>>) -> PyResu
             .map(|c| NumpyComplex64::new(c.re, c.im))
             .collect();
 
-        let result_array = scirs2_core::ndarray::Array2::from_shape_vec((rows, cols), complex_result)
-            .map_err(|e| PyRuntimeError::new_err(format!("Shape error: {}", e)))?;
+        let result_array =
+            scirs2_core::ndarray::Array2::from_shape_vec((rows, cols), complex_result)
+                .map_err(|e| PyRuntimeError::new_err(format!("Shape error: {}", e)))?;
 
         Ok(result_array.into_pyarray(py).unbind())
     }
 
-    #[cfg(not(feature = "fftw"))]
+    #[cfg(not(feature = "oxifft"))]
     {
-        Err(PyRuntimeError::new_err("RFFT2 requires FFTW feature"))
+        let _ = arr;
+        Err(PyRuntimeError::new_err("RFFT2 requires oxifft feature"))
     }
 }
 
@@ -377,7 +401,7 @@ fn ifft2_py(
     let binding = data.readonly();
     let arr = binding.as_array();
 
-    #[cfg(feature = "fftw")]
+    #[cfg(feature = "oxifft")]
     {
         let (rows, cols) = arr.dim();
         let n = rows * cols;
@@ -387,11 +411,12 @@ fn ifft2_py(
         for c in arr.iter() {
             complex_vec.push(Complex64::new(c.re, c.im));
         }
-        let complex_input = scirs2_core::ndarray::Array2::from_shape_vec((rows, cols), complex_vec)
-            .map_err(|e| PyRuntimeError::new_err(format!("Shape error: {}", e)))?;
+        let complex_input =
+            scirs2_core::ndarray::Array2::from_shape_vec((rows, cols), complex_vec)
+                .map_err(|e| PyRuntimeError::new_err(format!("Shape error: {}", e)))?;
 
-        let result = scirs2_fft::fftw_backend::ifft2_fftw(&complex_input.view())
-            .map_err(|e| PyRuntimeError::new_err(format!("IFFT2 (FFTW) failed: {}", e)))?;
+        let result = scirs2_fft::oxifft_backend::ifft2_oxifft(&complex_input.view())
+            .map_err(|e| PyRuntimeError::new_err(format!("IFFT2 (OxiFFT) failed: {}", e)))?;
 
         // Direct allocation for output
         let mut result_vec: Vec<NumpyComplex64> = Vec::with_capacity(n);
@@ -399,15 +424,17 @@ fn ifft2_py(
             result_vec.push(NumpyComplex64::new(c.re, c.im));
         }
 
-        let result_array = scirs2_core::ndarray::Array2::from_shape_vec((rows, cols), result_vec)
-            .map_err(|e| PyRuntimeError::new_err(format!("Shape error: {}", e)))?;
+        let result_array =
+            scirs2_core::ndarray::Array2::from_shape_vec((rows, cols), result_vec)
+                .map_err(|e| PyRuntimeError::new_err(format!("Shape error: {}", e)))?;
 
         Ok(result_array.into_pyarray(py).unbind())
     }
 
-    #[cfg(not(feature = "fftw"))]
+    #[cfg(not(feature = "oxifft"))]
     {
-        Err(PyRuntimeError::new_err("IFFT2 requires FFTW feature"))
+        let _ = arr;
+        Err(PyRuntimeError::new_err("IFFT2 requires oxifft feature"))
     }
 }
 
@@ -422,7 +449,7 @@ fn irfft2_py(
     let binding = data.readonly();
     let arr = binding.as_array();
 
-    #[cfg(feature = "fftw")]
+    #[cfg(feature = "oxifft")]
     {
         let (in_rows, in_cols) = arr.dim();
 
@@ -436,15 +463,16 @@ fn irfft2_py(
             .into_shape_with_order((in_rows, in_cols))
             .map_err(|e| PyRuntimeError::new_err(format!("Shape error: {}", e)))?;
 
-        let result = scirs2_fft::fftw_backend::irfft2_fftw(&complex_input.view(), shape)
-            .map_err(|e| PyRuntimeError::new_err(format!("IRFFT2 (FFTW) failed: {}", e)))?;
+        let result = scirs2_fft::oxifft_backend::irfft2_oxifft(&complex_input.view(), shape)
+            .map_err(|e| PyRuntimeError::new_err(format!("IRFFT2 (OxiFFT) failed: {}", e)))?;
 
         Ok(result.into_pyarray(py).unbind())
     }
 
-    #[cfg(not(feature = "fftw"))]
+    #[cfg(not(feature = "oxifft"))]
     {
-        Err(PyRuntimeError::new_err("IRFFT2 requires FFTW feature"))
+        let _ = (arr, shape);
+        Err(PyRuntimeError::new_err("IRFFT2 requires oxifft feature"))
     }
 }
 

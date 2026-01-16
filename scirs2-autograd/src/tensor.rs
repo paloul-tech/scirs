@@ -460,6 +460,59 @@ impl<'graph, F: Float> Tensor<'graph, F> {
     pub fn to_vec(&self) -> Vec<usize> {
         self.shape()
     }
+
+    /// Creates a new tensor that is detached from the computation graph.
+    ///
+    /// The detached tensor:
+    /// - Has the same value as the original tensor when evaluated
+    /// - Is not differentiable (gradients will not flow through it)
+    /// - Breaks the computation graph at this point
+    ///
+    /// This is essential for training loops to prevent gradient accumulation
+    /// across iterations. Similar to PyTorch's `tensor.detach()`.
+    ///
+    /// # Example
+    /// ```ignore
+    /// use scirs2_autograd as ag;
+    /// use ag::tensor_ops as T;
+    ///
+    /// ag::run(|ctx| {
+    ///     let x = T::ones(&[2, 3], ctx);
+    ///     let y = x * 2.0;
+    ///
+    ///     // Detach y from the computation graph
+    ///     let y_detached = y.detach();
+    ///
+    ///     // Further operations using y_detached won't track gradients back to x
+    ///     let z = y_detached * 3.0;
+    /// });
+    /// ```
+    #[inline]
+    pub fn detach(&self) -> Tensor<'graph, F> {
+        crate::tensor_ops::stop_gradient(*self)
+    }
+
+    /// Creates a new tensor with gradient tracking enabled/disabled.
+    ///
+    /// This is a more explicit version of `detach()` that allows you to
+    /// specify whether the tensor should track gradients or not.
+    ///
+    /// # Arguments
+    /// * `requires_grad` - If false, the tensor will be detached from the graph
+    ///
+    /// # Example
+    /// ```ignore
+    /// let y = x.with_grad(false);  // Same as x.detach()
+    /// let z = x.with_grad(true);   // No-op, keeps gradient tracking
+    /// ```
+    #[inline]
+    pub fn with_grad(&self, requires_grad: bool) -> Tensor<'graph, F> {
+        if requires_grad {
+            *self
+        } else {
+            self.detach()
+        }
+    }
 }
 
 impl<'b, T: Float> AsRef<Tensor<'b, T>> for Tensor<'b, T> {

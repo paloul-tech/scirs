@@ -44,7 +44,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-scirs2-autograd = "0.1.0"
+scirs2-autograd = "0.1.2"
 ```
 
 ### Optional Features
@@ -53,7 +53,7 @@ Enable performance optimizations and additional backends:
 
 ```toml
 [dependencies]
-scirs2-autograd = { version = "0.1.0", features = ["blas", "simd"] }
+scirs2-autograd = { version = "0.1.2", features = ["blas", "simd"] }
 ```
 
 **Available Features:**

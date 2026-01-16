@@ -41,7 +41,7 @@
 //! Add to your `Cargo.toml`:
 //! ```toml
 //! [dependencies]
-//! scirs2-fft = "0.1.0"
+//! scirs2-fft = "0.1.2"
 //! ```
 //!
 //!
@@ -157,8 +157,8 @@
 //!
 //! ## 🔒 Version Information
 //!
-//! - **Version**: 0.1.0
-//! - **Release Date**: December 29, 2025
+//! - **Version**: 0.1.2
+//! - **Release Date**: January 15, 2026
 //! - **MSRV** (Minimum Supported Rust Version): 1.70.0
 //! - **Documentation**: [docs.rs/scirs2-fft](https://docs.rs/scirs2-fft)
 //! - **Repository**: [github.com/cool-japan/scirs](https://github.com/cool-japan/scirs)
@@ -166,13 +166,13 @@
 // Export error types
 pub mod error;
 
-// FFTW backend for high performance (62x speedup)
-#[cfg(feature = "fftw")]
-pub mod fftw_backend;
+// OxiFFT backend - Pure Rust high-performance FFT
+#[cfg(feature = "oxifft")]
+pub mod oxifft_backend;
 
-// FFTW plan cache for performance optimization
-#[cfg(feature = "fftw")]
-pub mod fftw_plan_cache;
+// OxiFFT plan cache for performance optimization
+#[cfg(feature = "oxifft")]
+pub mod oxifft_plan_cache;
 
 pub use error::{FFTError, FFTResult};
 

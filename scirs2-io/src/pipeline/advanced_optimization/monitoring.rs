@@ -61,11 +61,11 @@ impl ResourceMonitor {
 
             Ok(metrics)
         } else {
+            // Safe: we know cached_metrics is Some because we checked is_none() above
             Ok(self
                 .cached_metrics
-                .as_ref()
-                .expect("Operation failed")
-                .clone())
+                .clone()
+                .expect("cached_metrics should be Some here"))
         }
     }
 

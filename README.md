@@ -5,23 +5,24 @@
 
 SciRS2 is a comprehensive scientific computing and AI/ML infrastructure in **Pure Rust**, providing SciPy-compatible APIs while leveraging Rust's performance, safety, and concurrency features. Unlike traditional scientific libraries, SciRS2 is **100% Pure Rust by default** with no C/C++/Fortran dependencies required, making installation effortless and ensuring cross-platform compatibility. The project aims to provide a complete ecosystem for scientific computing, data analysis, and machine learning in Rust.
 
-## 🎉 Release Status: v0.1.1 - Stable Release
+## 🎉 Release Status: v0.1.2 - Performance & Pure Rust Release
 
-**First Stable Release** - Production Ready! 🚀
+**Latest Stable Release** - Enhanced Performance & 100% Pure Rust! 🚀
 
-- ✅ **Refactoring Policy Compliance**: All files meet <2000 line policy (21 files → 150+ modules)
-- ✅ **Zero Warnings Policy**: Clean build with 0 compilation errors, 0 non-doc warnings
-- ✅ **Comprehensive Testing**: 11,416 tests passing across 170 binaries (174 skipped)
-- ✅ **Code Quality**: Full clippy compliance, 1.68M lines of production-ready Rust code
-- ✅ **Production Ready**: Stable APIs, comprehensive documentation, excellent test coverage
-- 📅 **Release Date**: December 29, 2025
+- ✅ **Pure Rust FFT**: Migrated from FFTW to OxiFFT - 100% Pure Rust by default
+- ✅ **Zero-Allocation SIMD**: In-place operations for optimal performance (AVX2/NEON)
+- ✅ **AI/ML Ready**: Functional optimizers (SGD, Adam, RMSprop) with training infrastructure
+- ✅ **Zero Warnings Policy**: Clean build with 0 compilation errors, 0 clippy warnings
+- ✅ **Comprehensive Testing**: 11,400+ tests passing across 170+ binaries
+- ✅ **Code Quality**: 2.42M total lines (1.68M Rust code), full clippy compliance
+- 📅 **Release Date**: January 15, 2026
 
-**What's New in 0.1.0 Stable**:
-- Complete codebase refactoring to meet file size policy (<2000 lines per file)
-- 150+ module visibility and import fixes for comprehensive test coverage
-- Resolved all compilation warnings and clippy issues
-- Enhanced module organization with clear separation of concerns
-- Production-ready code quality and stability
+**What's New in 0.1.2**:
+- **FFT Migration**: Complete switch to Pure Rust OxiFFT (no C dependencies)
+- **Performance**: Zero-allocation SIMD operations with in-place computation
+- **ML Infrastructure**: Production-ready functional optimizers and training loops
+- **Code Quality**: All clippy warnings resolved, enhanced API compatibility
+- **Pure Rust**: 100% Pure Rust by default (OxiBLAS + OxiFFT)
 
 See [SCIRS2_POLICY.md](SCIRS2_POLICY.md) for architectural details and [CHANGELOG.md](CHANGELOG.md) for complete details.
 
@@ -29,10 +30,10 @@ See [SCIRS2_POLICY.md](SCIRS2_POLICY.md) for architectural details and [CHANGELO
 
 **SciRS2 is 100% Pure Rust by default** - no C, C++, or Fortran dependencies required!
 
-Unlike traditional scientific computing libraries that rely on external system libraries (OpenBLAS, LAPACK, FFTW), SciRS2 provides a completely self-contained Pure Rust implementation:
+Unlike traditional scientific computing libraries that rely on external system libraries (OpenBLAS, LAPACK), SciRS2 provides a completely self-contained Pure Rust implementation:
 
 - ✅ **BLAS/LAPACK**: Pure Rust [OxiBLAS](https://github.com/cool-japan/oxiblas) implementation (no OpenBLAS/MKL/Accelerate required)
-- ✅ **FFT**: Pure Rust [RustFFT](https://github.com/ejmahler/RustFFT) implementation (FFTW is optional for 62x speedup)
+- ✅ **FFT**: Pure Rust [OxiFFT](https://github.com/cool-japan/oxifft) with FFTW-comparable performance (no C libraries required)
 - ✅ **Random Number Generation**: Pure Rust implementations of all statistical distributions
 - ✅ **All Core Modules**: Every scientific computing module works out-of-the-box without external dependencies
 
@@ -41,15 +42,15 @@ Unlike traditional scientific computing libraries that rely on external system l
 - 🔒 **Memory Safety**: Rust's ownership system prevents memory leaks and data races
 - 🌍 **Cross-Platform**: Same code works on Linux, macOS, Windows, and WebAssembly
 - 📦 **Reproducible Builds**: No external library version conflicts
-- ⚡ **Performance**: Competitive performance with optional C library acceleration where needed
+- ⚡ **Performance**: High performance Pure Rust FFT via OxiFFT (FFTW-compatible algorithms)
 
 **Optional Performance Enhancements** (not required for functionality):
-- `fftw` feature: Link FFTW library for 62x FFT speedup (C library)
+- `oxifft` feature: High-performance Pure Rust FFT with FFTW-compatible algorithms
 - `mpsgraph` feature: Apple Metal GPU acceleration (macOS only, Objective-C)
 - `cuda` feature: NVIDIA CUDA GPU acceleration
 - `arbitrary-precision` feature: GMP/MPFR for arbitrary precision arithmetic (C library)
 
-Enable with: `cargo add scirs2 --features fftw,cuda`
+Enable with: `cargo add scirs2 --features oxifft,cuda`
 
 By default, SciRS2 provides a **fully functional, Pure Rust scientific computing stack** that rivals the performance of traditional C/Fortran-based libraries while offering superior safety, portability, and ease of use.
 
@@ -414,7 +415,7 @@ SciRS2 and all its modules are available on [crates.io](https://crates.io/crates
 ```toml
 # Add the main integration crate for all functionality
 [dependencies]
-scirs2 = "0.1.1"
+scirs2 = "0.1.2"
 ```
 
 Or include only the specific modules you need:
@@ -422,16 +423,16 @@ Or include only the specific modules you need:
 ```toml
 [dependencies]
 # Core utilities
-scirs2-core = "0.1.1"
+scirs2-core = "0.1.2"
 
 # Scientific computing modules
-scirs2-linalg = "0.1.1"
-scirs2-stats = "0.1.1"
-scirs2-optimize = "0.1.1"
+scirs2-linalg = "0.1.2"
+scirs2-stats = "0.1.2"
+scirs2-optimize = "0.1.2"
 
 # AI/ML modules
-scirs2-neural = "0.1.1"
-scirs2-autograd = "0.1.1"
+scirs2-neural = "0.1.2"
+scirs2-autograd = "0.1.2"
 # Note: For ML optimization algorithms, use the independent OptiRS project
 ```
 
@@ -707,10 +708,10 @@ All SciRS2 modules are available on crates.io. Add the modules you need to your 
 
 ```toml
 [dependencies]
-scirs2 = "0.1.1"  # Core library with all modules
+scirs2 = "0.1.2"  # Core library with all modules
 # Or individual modules:
-scirs2-linalg = "0.1.1"  # Linear algebra
-scirs2-stats = "0.1.1"   # Statistics
+scirs2-linalg = "0.1.2"  # Linear algebra
+scirs2-stats = "0.1.2"   # Statistics
 # ... and more
 ```
 

@@ -5,6 +5,134 @@ All notable changes to the SciRS2 project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-01-15
+
+### 🚀 Performance & Pure Rust Enhancement Release
+
+This release focuses on performance optimization, enhanced AI/ML capabilities, and complete migration to Pure Rust FFT implementation.
+
+### Added
+
+#### Performance Enhancements
+- **Zero-Allocation SIMD Operations** (scirs2-core)
+  - Added in-place SIMD operations: `simd_add_inplace`, `simd_sub_inplace`, `simd_mul_inplace`, `simd_div_inplace`
+  - Added into-buffer SIMD operations: `simd_add_into`, `simd_sub_into`, `simd_mul_into`, `simd_div_into`
+  - Added scalar in-place operations: `simd_add_scalar_inplace`, `simd_mul_scalar_inplace`
+  - Added fused multiply-add: `simd_fma_into`
+  - Support for AVX2 (x86_64) and NEON (aarch64) with scalar fallbacks
+  - Direct buffer operations eliminate intermediate allocations for improved throughput
+- **AlignedVec Enhancements** (scirs2-core)
+  - Added utility methods: `set`, `get`, `fill`, `clear`, `with_capacity_uninit`
+  - Optimized for SIMD-aligned memory operations
+
+#### AI/ML Infrastructure
+- **Functional Optimizers** (scirs2-autograd)
+  - `FunctionalSGD`: Stateless Stochastic Gradient Descent optimizer
+  - `FunctionalAdam`: Stateless Adaptive Moment Estimation optimizer
+  - `FunctionalRMSprop`: Stateless Root Mean Square Propagation optimizer
+  - All optimizers support learning rate scheduling and parameter inspection
+- **Training Loop Infrastructure** (scirs2-autograd)
+  - `TrainingLoop` for managing training workflows
+  - Graph statistics tracking for performance monitoring
+  - Comprehensive test suite for optimizer verification
+- **Tensor Operations** (scirs2-autograd)
+  - Enhanced tensor operations for optimizer integration
+  - Graph enhancements for computational efficiency
+
+### Changed
+
+#### FFT Backend Migration
+- **Complete migration from FFTW to OxiFFT** (scirs2-fft)
+  - Removed C dependency on FFTW library
+  - Implemented Pure Rust `OxiFftBackend` with FFTW-compatible performance
+  - New `OxiFftPlanCache` for efficient plan management
+  - Updated all examples and integration tests
+  - Updated Python bindings (scirs2-python) to use OxiFFT
+  - **Benefits**: 100% Pure Rust implementation, cross-platform compatibility, memory safety, easier installation
+
+#### API Compatibility
+- **SciPy Compatibility Benchmarks** (scirs2-linalg)
+  - Updated all benchmark function calls to match simplified scipy compat API
+  - Fixed signatures for: `det`, `norm`, `lu`, `cholesky`, `eigh`, `compat_solve`, `lstsq`
+  - Added proper `UPLO` enum usage for symmetric/Hermitian operations
+  - Fixed dimension mismatches in linear system solvers
+  - Net simplification: 148 insertions, 114 deletions
+
+#### Documentation Updates
+- Updated README.md to reflect OxiFFT migration and Pure Rust status
+- Updated performance documentation with OxiFFT benchmarks
+- Enhanced development workflow documentation
+
+### Fixed
+
+#### Code Quality
+- **Zero Warnings Policy Compliance**
+  - Fixed `unnecessary_unwrap` warnings in scirs2-core stress tests (6 occurrences)
+  - Fixed `unnecessary_unwrap` warnings in scirs2-io netcdf and monitoring modules (2 occurrences)
+  - Fixed `needless_borrows_for_generic_args` warnings in scirs2-autograd tests (5 occurrences)
+  - Replaced `is_some() + expect()` patterns with `if let Some()` for better idiomatic code
+- **Linting Improvements**
+  - Autograd optimizer code quality improvements
+  - Test code clarity enhancements
+  - Updated .gitignore for better project hygiene
+
+#### Bug Fixes
+- Fixed assertion style in scirs2-ndimage contours: `len() >= 1` → `!is_empty()`
+- Resolved all clippy warnings across workspace
+
+### Technical Details
+
+#### Quality Metrics
+- **Tests**: All 11,400+ tests passing across 170+ binaries
+- **Warnings**: Zero compilation warnings, zero clippy warnings
+- **Code Size**: 2.42M total lines (1.68M Rust code, 149K comments)
+- **Files**: 4,730 Rust files across 23 workspace crates
+
+#### Pure Rust Compliance
+- ✅ **FFT**: 100% Pure Rust via OxiFFT (no FFTW dependency)
+- ✅ **BLAS/LAPACK**: 100% Pure Rust via OxiBLAS
+- ✅ **Random**: Pure Rust statistical distributions
+- ✅ **Default Build**: No C/C++/Fortran dependencies required
+
+#### Platform Support
+- ✅ **Linux (x86_64)**: Full support with all features
+- ✅ **macOS (ARM64/x86_64)**: Full support with Metal acceleration
+- ✅ **Windows (x86_64)**: Full support with optimizations
+- ✅ **WebAssembly**: Compatible (Pure Rust benefits)
+
+### Performance Impact
+
+The zero-allocation SIMD operations and OxiFFT migration provide:
+- Reduced memory allocations in numerical computation hot paths
+- Improved cache locality through in-place operations
+- Better cross-platform performance consistency
+- Maintained FFTW-level FFT performance in Pure Rust
+
+### Breaking Changes
+
+None. All changes are backward compatible with 0.1.1 API.
+
+### Notes
+
+This release strengthens SciRS2's Pure Rust foundation while adding production-ready ML optimization infrastructure. The FFT migration eliminates the last major C dependency in the default build, making SciRS2 truly 100% Pure Rust by default.
+
+## [0.1.1] - 2025-12-30
+
+### 🔧 Maintenance Release
+
+This release includes minor updates and stabilization improvements following the 0.1.0 stable release.
+
+### Changed
+- Documentation refinements
+- Minor dependency updates
+- Build system improvements
+
+### Fixed
+- Various minor bug fixes and code quality improvements
+
+### Notes
+This is a maintenance release building on the stable 0.1.0 foundation.
+
 ## [0.1.0] - 2025-12-29
 
 ### 🎉 Stable Release - Production Ready

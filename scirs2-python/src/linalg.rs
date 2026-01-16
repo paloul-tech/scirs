@@ -309,7 +309,9 @@ fn pinv_py(py: Python, a: &Bound<'_, PyArray2<f64>>, rcond: Option<f64>) -> PyRe
     let binding = a.readonly();
     let data = binding.as_array();
 
-    let result = pinv(&data, rcond, false, true)  // hermitian=false, check_finite=true
+    // Note: scirs2_linalg::pinv only takes the array argument; rcond is handled internally
+    let _ = rcond;  // rcond parameter accepted for API compatibility
+    let result = pinv(&data)
         .map_err(|e| PyRuntimeError::new_err(format!("Pseudoinverse failed: {}", e)))?;
 
     Ok(result.into_pyarray(py).unbind())

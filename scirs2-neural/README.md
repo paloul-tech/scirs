@@ -65,20 +65,20 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-scirs2-neural = "0.1.0"
+scirs2-neural = "0.1.2"
 ```
 
 To enable optimizations and optional features:
 
 ```toml
 [dependencies]
-scirs2-neural = { version = "0.1.0", features = ["simd", "parallel"] }
+scirs2-neural = { version = "0.1.2", features = ["simd", "parallel"] }
 
 # For performance optimization
-scirs2-neural = { version = "0.1.0", features = ["jit", "cuda"] }
+scirs2-neural = { version = "0.1.2", features = ["jit", "cuda"] }
 
 # For integration with scirs2-metrics
-scirs2-neural = { version = "0.1.0", features = ["metrics_integration"] }
+scirs2-neural = { version = "0.1.2", features = ["metrics_integration"] }
 ```
 
 ## Quick Start

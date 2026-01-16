@@ -27,7 +27,7 @@ scirs2-cluster = { path = "../scirs2-cluster", features = ["python"] }
 scirs2-series = { path = "../scirs2-series", features = ["python"] }
 scirs2-linalg = { path = "../scirs2-linalg", features = ["python"] }
 scirs2-stats = { path = "../scirs2-stats", features = ["python"] }
-scirs2-fft = { path = "../scirs2-fft", features = ["python", "fftw"] }
+scirs2-fft = { path = "../scirs2-fft", features = ["python", "oxifft"] }
 scirs2-optimize = { path = "../scirs2-optimize", features = ["python"] }
 scirs2-special = { path = "../scirs2-special" }
 scirs2-integrate = { path = "../scirs2-integrate" }
@@ -43,7 +43,7 @@ scirs2-numpy = { path = "../scirs2-numpy" }  # SciRS2 fork with ndarray 0.17 sup
 thiserror = "2.0.16"
 
 [features]
-default = ["cluster", "series", "linalg", "stats", "fft", "optimize", "special", "integrate", "interpolate", "signal", "spatial", "fftw"]
+default = ["cluster", "series", "linalg", "stats", "fft", "optimize", "special", "integrate", "interpolate", "signal", "spatial", "oxifft"]
 
 # Module features
 cluster = []
@@ -59,8 +59,7 @@ signal = []
 spatial = []
 
 # Performance optimization features
-fftw = ["scirs2-fft/fftw"]  # Enable FFTW for 62x FFT speedup
-# blas-lapack = ["scirs2-linalg/blas-lapack"]  # BLAS/LAPACK now always enabled
+oxifft = ["scirs2-fft/oxifft"]  # Pure Rust high-performance FFT
 
 # Acceleration features (passed through to subcrates)
 simd = ["scirs2-core/simd"]
@@ -68,4 +67,4 @@ parallel = ["scirs2-core/parallel"]
 gpu = ["scirs2-core/gpu"]
 
 # All modules
-full = ["cluster", "series", "linalg", "stats", "fft", "optimize", "special", "integrate", "interpolate", "signal"]
+full = ["cluster", "series", "linalg", "stats", "fft", "optimize", "special", "integrate", "interpolate", "signal", "oxifft"]

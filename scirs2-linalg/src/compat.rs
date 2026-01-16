@@ -6,7 +6,7 @@
 //! # Example
 //!
 //! ```rust
-//! use ndarray::array;
+//! use scirs2_core::ndarray::array;
 //! use scirs2_linalg::compat::ArrayLinalgExt;
 //!
 //! let a = array![[1.0_f64, 2.0], [3.0, 4.0]];

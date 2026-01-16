@@ -98,8 +98,8 @@ fn main() {
 
     // Future features demonstration (commented out as they're not implemented yet)
     /*
-    // Switch to a hypothetical FFTW backend
-    set_backend("fftw").ok();
+    // Switch to OxiFFT backend (Pure Rust, high-performance)
+    set_backend("oxifft").ok();
 
     // Use GPU backend if available
     if backends.contains(&"cuda_fft".to_string()) {

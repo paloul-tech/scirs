@@ -18,14 +18,14 @@ SciRS2 delivers **100% Pure Rust implementation by default** - eliminating the c
 
 ### Breaking Free from Legacy Dependencies
 
-For decades, scientific computing has been shackled to C and Fortran dependencies. NumPy, SciPy, and TensorFlow all rely on system libraries like OpenBLAS, LAPACK, and FFTW - creating installation nightmares, cross-platform compatibility issues, and security vulnerabilities.
+For decades, scientific computing has been shackled to C and Fortran dependencies. NumPy, SciPy, and TensorFlow all rely on system libraries like OpenBLAS and LAPACK - creating installation nightmares, cross-platform compatibility issues, and security vulnerabilities.
 
 **SciRS2 changes everything.**
 
 By default, SciRS2 requires **zero external C, C++, or Fortran dependencies**:
 
 - **BLAS/LAPACK**: Pure Rust [OxiBLAS](https://github.com/cool-japan/oxiblas) implementation (no OpenBLAS/MKL/Accelerate required)
-- **FFT Operations**: Pure Rust [RustFFT](https://github.com/ejmahler/RustFFT) implementation (FFTW is optional)
+- **FFT Operations**: Pure Rust [OxiFFT](https://github.com/cool-japan/oxifft) implementation with FFTW-comparable performance
 - **Random Number Generation**: Pure Rust implementations of all statistical distributions
 - **All Core Modules**: Every scientific computing module works out-of-the-box
 

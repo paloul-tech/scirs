@@ -81,21 +81,21 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-scirs2-fft = "0.1.0"
+scirs2-fft = "0.1.2"
 
 # Optional: Enable parallel processing
-scirs2-fft = { version = "0.1.0", features = ["parallel"] }
+scirs2-fft = { version = "0.1.2", features = ["parallel"] }
 
 # GPU acceleration options
-scirs2-fft = { version = "0.1.0", features = ["cuda"] }     # NVIDIA GPUs
-scirs2-fft = { version = "0.1.0", features = ["hip"] }      # AMD GPUs  
-scirs2-fft = { version = "0.1.0", features = ["sycl"] }     # Cross-platform GPUs
+scirs2-fft = { version = "0.1.2", features = ["cuda"] }     # NVIDIA GPUs
+scirs2-fft = { version = "0.1.2", features = ["hip"] }      # AMD GPUs  
+scirs2-fft = { version = "0.1.2", features = ["sycl"] }     # Cross-platform GPUs
 
 # Enable all GPU backends for maximum hardware support
-scirs2-fft = { version = "0.1.0", features = ["cuda", "hip", "sycl"] }
+scirs2-fft = { version = "0.1.2", features = ["cuda", "hip", "sycl"] }
 
 # Full acceleration stack with parallel processing and all GPU backends
-scirs2-fft = { version = "0.1.0", features = ["parallel", "cuda", "hip", "sycl"] }
+scirs2-fft = { version = "0.1.2", features = ["parallel", "cuda", "hip", "sycl"] }
 ```
 
 Basic usage examples:

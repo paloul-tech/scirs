@@ -32,7 +32,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! scirs2-neural = "0.1.0"
+//! scirs2-neural = "0.1.2"
 //! ```
 //!
 //! ### Building a Simple Neural Network
@@ -305,7 +305,7 @@
 //!
 //! ## 🔒 Version
 //!
-//! Current version: **0.1.0** (Released December 29, 2025)
+//! Current version: **0.1.2** (Released January 15, 2026)
 
 pub mod activations_minimal;
 pub mod autograd;

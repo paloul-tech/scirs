@@ -5,11 +5,13 @@
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use pyo3::types::{PyAny, PyDict};
-use scirs2_numpy::{PyArray1, PyArray2, PyArrayMethods};
-use scirs2_stats::tests::ttest::{ttest_1samp, ttest_ind, ttest_rel, Alternative};
+use scirs2_numpy::{PyArray1, PyArrayMethods};
+use scirs2_stats::tests::ttest::{ttest_rel, Alternative};
 use scirs2_stats::{
-    boxplot_stats, quartiles, quintiles, deciles, winsorized_mean, winsorized_variance,
-    QuantileInterpolation,
+    boxplot_stats, quartiles, quintiles, winsorized_mean, winsorized_variance,
+    QuantileInterpolation, mean_abs_deviation, median_abs_deviation, data_range,
+    coef_variation, gini_coefficient, entropy, kl_divergence, cross_entropy,
+    weighted_mean, moment, skewness_ci, kurtosis_ci,
 };
 
 /// Paired (related samples) t-test.
@@ -27,7 +29,7 @@ use scirs2_stats::{
 ///     Dictionary with 'statistic' (t), 'pvalue', and 'df' (degrees of freedom)
 #[pyfunction]
 #[pyo3(signature = (a, b, alternative = "two-sided"))]
-fn ttest_rel_py(
+pub fn ttest_rel_py(
     py: Python,
     a: &Bound<'_, PyArray1<f64>>,
     b: &Bound<'_, PyArray1<f64>>,
@@ -62,7 +64,7 @@ fn ttest_rel_py(
 }
 /// Skewness of the data
 #[pyfunction]
-fn skew_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
+pub fn skew_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     let n = arr.len() as f64;
@@ -79,7 +81,7 @@ fn skew_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
 }
 /// Kurtosis of the data
 #[pyfunction]
-fn kurtosis_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
+pub fn kurtosis_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     let n = arr.len() as f64;
@@ -96,7 +98,7 @@ fn kurtosis_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
 }
 /// Mode of the data (most frequent value)
 #[pyfunction]
-fn mode_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
+pub fn mode_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     if arr.is_empty() {
@@ -127,7 +129,7 @@ fn mode_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
 }
 /// Geometric mean
 #[pyfunction]
-fn gmean_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
+pub fn gmean_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     let n = arr.len();
@@ -146,7 +148,7 @@ fn gmean_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
 }
 /// Harmonic mean
 #[pyfunction]
-fn hmean_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
+pub fn hmean_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     let n = arr.len();
@@ -165,7 +167,7 @@ fn hmean_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
 }
 /// Z-score normalization
 #[pyfunction]
-fn zscore_py(
+pub fn zscore_py(
     py: Python,
     data: &Bound<'_, PyArray1<f64>>,
 ) -> PyResult<Py<PyArray1<f64>>> {
@@ -196,7 +198,7 @@ fn zscore_py(
 /// - Mean absolute deviation value
 #[pyfunction]
 #[pyo3(signature = (data, center = None))]
-fn mean_abs_deviation_py(
+pub fn mean_abs_deviation_py(
     data: &Bound<'_, PyArray1<f64>>,
     center: Option<f64>,
 ) -> PyResult<f64> {
@@ -221,7 +223,7 @@ fn mean_abs_deviation_py(
 /// - Median absolute deviation value
 #[pyfunction]
 #[pyo3(signature = (data, center = None, scale = None))]
-fn median_abs_deviation_py(
+pub fn median_abs_deviation_py(
     data: &Bound<'_, PyArray1<f64>>,
     center: Option<f64>,
     scale: Option<f64>,
@@ -243,7 +245,7 @@ fn median_abs_deviation_py(
 /// Returns:
 /// - Range value (max - min)
 #[pyfunction]
-fn data_range_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
+pub fn data_range_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     data_range(&arr.view())
@@ -264,7 +266,7 @@ fn data_range_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
 /// - Coefficient of variation
 #[pyfunction]
 #[pyo3(signature = (data, ddof = 1))]
-fn coef_variation_py(data: &Bound<'_, PyArray1<f64>>, ddof: usize) -> PyResult<f64> {
+pub fn coef_variation_py(data: &Bound<'_, PyArray1<f64>>, ddof: usize) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     coef_variation(&arr.view(), ddof)
@@ -283,7 +285,7 @@ fn coef_variation_py(data: &Bound<'_, PyArray1<f64>>, ddof: usize) -> PyResult<f
 /// Returns:
 /// - Gini coefficient
 #[pyfunction]
-fn gini_coefficient_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
+pub fn gini_coefficient_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     gini_coefficient(&arr.view())
@@ -294,7 +296,7 @@ fn gini_coefficient_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<f64> {
 /// Compute boxplot statistics (five-number summary + outliers)
 #[pyfunction]
 #[pyo3(signature = (data, whis = 1.5))]
-fn boxplot_stats_py(
+pub fn boxplot_stats_py(
     py: Python,
     data: &Bound<'_, PyArray1<f64>>,
     whis: f64,
@@ -318,7 +320,7 @@ fn boxplot_stats_py(
 }
 /// Compute quartiles (Q1, Q2, Q3)
 #[pyfunction]
-fn quartiles_py(
+pub fn quartiles_py(
     py: Python<'_>,
     data: &Bound<'_, PyArray1<f64>>,
 ) -> PyResult<Py<PyArray1<f64>>> {
@@ -333,7 +335,7 @@ fn quartiles_py(
 /// Compute winsorized mean (robust mean)
 #[pyfunction]
 #[pyo3(signature = (data, limits = 0.1))]
-fn winsorized_mean_py(data: &Bound<'_, PyArray1<f64>>, limits: f64) -> PyResult<f64> {
+pub fn winsorized_mean_py(data: &Bound<'_, PyArray1<f64>>, limits: f64) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     winsorized_mean::<f64>(&arr.view(), limits)
@@ -344,7 +346,7 @@ fn winsorized_mean_py(data: &Bound<'_, PyArray1<f64>>, limits: f64) -> PyResult<
 /// Compute winsorized variance (robust variance)
 #[pyfunction]
 #[pyo3(signature = (data, limits = 0.1, ddof = 1))]
-fn winsorized_variance_py(
+pub fn winsorized_variance_py(
     data: &Bound<'_, PyArray1<f64>>,
     limits: f64,
     ddof: usize,
@@ -359,7 +361,7 @@ fn winsorized_variance_py(
 /// Compute Shannon entropy of discrete data
 #[pyfunction]
 #[pyo3(signature = (data, base = None))]
-fn entropy_py(data: &Bound<'_, PyArray1<i64>>, base: Option<f64>) -> PyResult<f64> {
+pub fn entropy_py(data: &Bound<'_, PyArray1<i64>>, base: Option<f64>) -> PyResult<f64> {
     let binding = data.readonly();
     let arr = binding.as_array();
     entropy::<i64>(&arr.view(), base)
@@ -369,7 +371,7 @@ fn entropy_py(data: &Bound<'_, PyArray1<i64>>, base: Option<f64>) -> PyResult<f6
 }
 /// Compute Kullback-Leibler divergence between two probability distributions
 #[pyfunction]
-fn kl_divergence_py(
+pub fn kl_divergence_py(
     p: &Bound<'_, PyArray1<f64>>,
     q: &Bound<'_, PyArray1<f64>>,
 ) -> PyResult<f64> {
@@ -384,7 +386,7 @@ fn kl_divergence_py(
 }
 /// Compute cross-entropy between two probability distributions
 #[pyfunction]
-fn cross_entropy_py(
+pub fn cross_entropy_py(
     p: &Bound<'_, PyArray1<f64>>,
     q: &Bound<'_, PyArray1<f64>>,
 ) -> PyResult<f64> {
@@ -399,7 +401,7 @@ fn cross_entropy_py(
 }
 /// Compute weighted mean
 #[pyfunction]
-fn weighted_mean_py(
+pub fn weighted_mean_py(
     data: &Bound<'_, PyArray1<f64>>,
     weights: &Bound<'_, PyArray1<f64>>,
 ) -> PyResult<f64> {
@@ -415,7 +417,7 @@ fn weighted_mean_py(
 /// Compute statistical moment
 #[pyfunction]
 #[pyo3(signature = (data, order, center = true))]
-fn moment_py(
+pub fn moment_py(
     data: &Bound<'_, PyArray1<f64>>,
     order: usize,
     center: bool,
@@ -429,7 +431,7 @@ fn moment_py(
 }
 /// Compute quintiles (20th, 40th, 60th, 80th percentiles) of a dataset
 #[pyfunction]
-fn quintiles_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyArray1<f64>>> {
+pub fn quintiles_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyArray1<f64>>> {
     let binding = data.readonly();
     let arr = binding.as_array();
     let result = quintiles::<f64>(&arr.view(), QuantileInterpolation::Linear)
@@ -443,7 +445,7 @@ fn quintiles_py(data: &Bound<'_, PyArray1<f64>>) -> PyResult<Py<PyArray1<f64>>> 
 #[pyo3(
     signature = (data, bias = false, confidence = 0.95, n_bootstrap = 1000, seed = None)
 )]
-fn skewness_ci_py(
+pub fn skewness_ci_py(
     py: Python,
     data: &Bound<'_, PyArray1<f64>>,
     bias: bool,
@@ -478,7 +480,7 @@ fn skewness_ci_py(
         seed = None
     )
 )]
-fn kurtosis_ci_py(
+pub fn kurtosis_ci_py(
     py: Python,
     data: &Bound<'_, PyArray1<f64>>,
     fisher: bool,

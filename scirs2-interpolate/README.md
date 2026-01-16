@@ -17,10 +17,10 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-scirs2-interpolate = "0.1.0"
+scirs2-interpolate = "0.1.2"
 
 # Optional: Enable high-performance features
-scirs2-interpolate = { version = "0.1.0", features = ["simd", "linalg"] }
+scirs2-interpolate = { version = "0.1.2", features = ["simd", "linalg"] }
 ```
 
 ### Feature Flags

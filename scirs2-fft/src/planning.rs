@@ -180,8 +180,8 @@ pub enum PlannerBackend {
     /// Default rustfft backend
     #[default]
     RustFFT,
-    /// FFTW-compatible backend
-    FFTW,
+    /// OxiFFT - Pure Rust high-performance FFT
+    OxiFFT,
     /// CUDA-accelerated backend
     CUDA,
     /// Custom backend implementation

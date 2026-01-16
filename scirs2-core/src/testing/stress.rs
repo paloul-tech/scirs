@@ -640,11 +640,11 @@ impl StressTestUtils {
             let tester = MemoryStressTester::new(stress_config_clone1.clone());
             let result = tester.test_progressive_allocation()?;
 
-            if result.error.is_some() {
+            if let Some(error) = result.error {
                 return Ok(TestResult::failure(
                     result.duration,
                     result.total_operations,
-                    result.error.expect("Operation failed"),
+                    error,
                 ));
             }
 
@@ -659,11 +659,11 @@ impl StressTestUtils {
             let tester = MemoryStressTester::new(stress_config_clone2.clone());
             let result = tester.test_fragmented_allocation()?;
 
-            if result.error.is_some() {
+            if let Some(error) = result.error {
                 return Ok(TestResult::failure(
                     result.duration,
                     result.total_operations,
-                    result.error.expect("Operation failed"),
+                    error,
                 ));
             }
 
@@ -679,11 +679,11 @@ impl StressTestUtils {
             let tester = CpuStressTester::new(stress_config_clone.clone());
             let result = tester.test_cpu_intensive_workload()?;
 
-            if result.error.is_some() {
+            if let Some(error) = result.error {
                 return Ok(TestResult::failure(
                     result.duration,
                     result.total_operations,
-                    result.error.expect("Operation failed"),
+                    error,
                 ));
             }
 
@@ -698,11 +698,11 @@ impl StressTestUtils {
             let tester = CpuStressTester::new(stress_config_clone2.clone());
             let result = tester.test_concurrent_cpu_workload()?;
 
-            if result.error.is_some() {
+            if let Some(error) = result.error {
                 return Ok(TestResult::failure(
                     result.duration,
                     result.total_operations,
-                    result.error.expect("Operation failed"),
+                    error,
                 ));
             }
 
@@ -718,11 +718,11 @@ impl StressTestUtils {
             let tester = ConcurrencyStressTester::new(stress_config_clone3.clone());
             let result = tester.test_shared_resource_contention()?;
 
-            if result.error.is_some() {
+            if let Some(error) = result.error {
                 return Ok(TestResult::failure(
                     result.duration,
                     result.total_operations,
-                    result.error.expect("Operation failed"),
+                    error,
                 ));
             }
 
@@ -737,11 +737,11 @@ impl StressTestUtils {
             let tester = ConcurrencyStressTester::new(stress_config_clone4.clone());
             let result = tester.test_lock_free_performance()?;
 
-            if result.error.is_some() {
+            if let Some(error) = result.error {
                 return Ok(TestResult::failure(
                     result.duration,
                     result.total_operations,
-                    result.error.expect("Operation failed"),
+                    error,
                 ));
             }
 

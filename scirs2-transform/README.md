@@ -53,14 +53,14 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-scirs2-transform = "0.1.0"
+scirs2-transform = "0.1.2"
 ```
 
 For parallel processing and enhanced performance:
 
 ```toml
 [dependencies]
-scirs2-transform = { version = "0.1.0", features = ["parallel"] }
+scirs2-transform = { version = "0.1.2", features = ["parallel"] }
 ```
 
 ## 🎯 Quick Start

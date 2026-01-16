@@ -25,14 +25,14 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-scirs2-datasets = "0.1.0"
+scirs2-datasets = "0.1.2"
 ```
 
 For remote dataset downloading capabilities:
 
 ```toml
 [dependencies]
-scirs2-datasets = { version = "0.1.0", features = ["download"] }
+scirs2-datasets = { version = "0.1.2", features = ["download"] }
 ```
 
 ## Quick Start

@@ -46,7 +46,7 @@
 //! Add to your `Cargo.toml`:
 //! ```toml
 //! [dependencies]
-//! scirs2-stats = "0.1.0"
+//! scirs2-stats = "0.1.2"
 //! ```
 //!
 //! ```rust
@@ -204,8 +204,8 @@
 //!
 //! ## 🔒 Version Information
 //!
-//! - **Version**: 0.1.0
-//! - **Release Date**: December 29, 2025
+//! - **Version**: 0.1.2
+//! - **Release Date**: January 15, 2026
 //! - **MSRV** (Minimum Supported Rust Version): 1.70.0
 //! - **Documentation**: [docs.rs/scirs2-stats](https://docs.rs/scirs2-stats)
 //! - **Repository**: [github.com/cool-japan/scirs](https://github.com/cool-japan/scirs)

@@ -50,7 +50,7 @@ fn bench_basic_operations(c: &mut Criterion) {
         // Benchmark determinant calculation
         group.throughput(Throughput::Elements(size as u64 * size as u64));
         group.bench_with_input(BenchmarkId::new("det_compat", size), &matrix, |b, m| {
-            b.iter(|| compat::det(&m.view(), false, true).expect("Operation failed"))
+            b.iter(|| compat::det(&m.view()).expect("Operation failed"))
         });
 
         group.bench_with_input(BenchmarkId::new("det_basic", size), &matrix, |b, m| {
@@ -59,7 +59,7 @@ fn bench_basic_operations(c: &mut Criterion) {
 
         // Benchmark matrix inverse
         group.bench_with_input(BenchmarkId::new("inv_compat", size), &matrix, |b, m| {
-            b.iter(|| compat::inv(&m.view(), false, true).expect("Operation failed"))
+            b.iter(|| compat::inv(&m.view()).expect("Operation failed"))
         });
 
         group.bench_with_input(BenchmarkId::new("inv_basic", size), &matrix, |b, m| {
@@ -84,12 +84,7 @@ fn benchmatrix_norms(c: &mut Criterion) {
         group.bench_with_input(
             BenchmarkId::new("frobenius_compat", size),
             &matrix,
-            |b, m| {
-                b.iter(|| {
-                    compat::norm(&m.view(), Some("fro"), None, false, true)
-                        .expect("Operation failed")
-                })
-            },
+            |b, m| b.iter(|| compat::norm(&m.view(), Some("fro")).expect("Operation failed")),
         );
 
         group.bench_with_input(
@@ -100,9 +95,7 @@ fn benchmatrix_norms(c: &mut Criterion) {
 
         // 1-norm
         group.bench_with_input(BenchmarkId::new("norm_1_compat", size), &matrix, |b, m| {
-            b.iter(|| {
-                compat::norm(&m.view(), Some("1"), None, false, true).expect("Operation failed")
-            })
+            b.iter(|| compat::norm(&m.view(), Some("1")).expect("Operation failed"))
         });
 
         group.bench_with_input(BenchmarkId::new("norm_1_basic", size), &matrix, |b, m| {
@@ -113,12 +106,7 @@ fn benchmatrix_norms(c: &mut Criterion) {
         group.bench_with_input(
             BenchmarkId::new("norm_inf_compat", size),
             &matrix,
-            |b, m| {
-                b.iter(|| {
-                    compat::norm(&m.view(), Some("inf"), None, false, true)
-                        .expect("Operation failed")
-                })
-            },
+            |b, m| b.iter(|| compat::norm(&m.view(), Some("inf")).expect("Operation failed")),
         );
 
         group.bench_with_input(BenchmarkId::new("norm_inf_basic", size), &matrix, |b, m| {
@@ -143,11 +131,7 @@ fn bench_vector_norms(c: &mut Criterion) {
         group.bench_with_input(
             BenchmarkId::new("vector_2norm_compat", size),
             &vector,
-            |b, v| {
-                b.iter(|| {
-                    compat::vector_norm(&v.view(), Some(2.0), true).expect("Operation failed")
-                })
-            },
+            |b, v| b.iter(|| compat::vector_norm(&v.view(), Some(2))),
         );
 
         group.bench_with_input(
@@ -160,11 +144,7 @@ fn bench_vector_norms(c: &mut Criterion) {
         group.bench_with_input(
             BenchmarkId::new("vector_1norm_compat", size),
             &vector,
-            |b, v| {
-                b.iter(|| {
-                    compat::vector_norm(&v.view(), Some(1.0), true).expect("Operation failed")
-                })
-            },
+            |b, v| b.iter(|| compat::vector_norm(&v.view(), Some(1))),
         );
 
         group.bench_with_input(
@@ -177,12 +157,7 @@ fn bench_vector_norms(c: &mut Criterion) {
         group.bench_with_input(
             BenchmarkId::new("vector_infnorm_compat", size),
             &vector,
-            |b, v| {
-                b.iter(|| {
-                    compat::vector_norm(&v.view(), Some(f64::INFINITY), true)
-                        .expect("Operation failed")
-                })
-            },
+            |b, v| b.iter(|| compat::vector_norm(&v.view(), None)),
         );
 
         group.bench_with_input(
@@ -210,7 +185,7 @@ fn bench_decompositions(c: &mut Criterion) {
 
         // LU decomposition
         group.bench_with_input(BenchmarkId::new("lu_compat", size), &matrix, |b, m| {
-            b.iter(|| compat::lu(&m.view(), false, false, true, false).expect("Operation failed"))
+            b.iter(|| compat::lu(&m.view()).expect("Operation failed"))
         });
 
         group.bench_with_input(BenchmarkId::new("lu_basic", size), &matrix, |b, m| {
@@ -219,9 +194,7 @@ fn bench_decompositions(c: &mut Criterion) {
 
         // QR decomposition
         group.bench_with_input(BenchmarkId::new("qr_compat", size), &matrix, |b, m| {
-            b.iter(|| {
-                compat::qr(&m.view(), false, None, "full", false, true).expect("Operation failed")
-            })
+            b.iter(|| compat::qr(&m.view()).expect("Operation failed"))
         });
 
         group.bench_with_input(BenchmarkId::new("qr_basic", size), &matrix, |b, m| {
@@ -231,10 +204,7 @@ fn bench_decompositions(c: &mut Criterion) {
         // SVD (smaller sizes due to computational cost)
         if size <= 50 {
             group.bench_with_input(BenchmarkId::new("svd_compat", size), &matrix, |b, m| {
-                b.iter(|| {
-                    compat::svd(&m.view(), true, true, false, true, "gesdd")
-                        .expect("Operation failed")
-                })
+                b.iter(|| compat::svd(&m.view(), true).expect("Operation failed"))
             });
 
             group.bench_with_input(BenchmarkId::new("svd_basic", size), &matrix, |b, m| {
@@ -247,7 +217,9 @@ fn bench_decompositions(c: &mut Criterion) {
             BenchmarkId::new("cholesky_compat", size),
             &spdmatrix,
             |b, m| {
-                b.iter(|| compat::cholesky(&m.view(), true, false, true).expect("Operation failed"))
+                b.iter(|| {
+                    compat::cholesky(&m.view(), compat::UPLO::Upper).expect("Operation failed")
+                })
             },
         );
 
@@ -278,22 +250,7 @@ fn bench_eigenvalues(c: &mut Criterion) {
             BenchmarkId::new("eigvals_compat", size),
             &spdmatrix,
             |b, m| {
-                b.iter(|| {
-                    compat::eigh(
-                        &m.view(),
-                        None,
-                        false,
-                        true,
-                        false,
-                        false,
-                        true,
-                        None,
-                        None,
-                        None,
-                        1,
-                    )
-                    .expect("Operation failed")
-                })
+                b.iter(|| compat::eigh(&m.view(), compat::UPLO::Upper).expect("Operation failed"))
             },
         );
 
@@ -306,22 +263,7 @@ fn bench_eigenvalues(c: &mut Criterion) {
         // Eigenvalues and eigenvectors (smaller sizes)
         if size <= 50 {
             group.bench_with_input(BenchmarkId::new("eigh_compat", size), &spdmatrix, |b, m| {
-                b.iter(|| {
-                    compat::eigh(
-                        &m.view(),
-                        None,
-                        false,
-                        false,
-                        false,
-                        false,
-                        true,
-                        None,
-                        None,
-                        None,
-                        1,
-                    )
-                    .expect("Operation failed")
-                })
+                b.iter(|| compat::eigh(&m.view(), compat::UPLO::Upper).expect("Operation failed"))
             });
 
             group.bench_with_input(BenchmarkId::new("eigh_basic", size), &spdmatrix, |b, m| {
@@ -349,21 +291,9 @@ fn bench_linear_solvers(c: &mut Criterion) {
         // General solve
         group.bench_with_input(
             BenchmarkId::new("solve_compat", size),
-            &(&matrix, &rhs_2d),
+            &(&matrix, &rhs_1d),
             |b, (m, r)| {
-                b.iter(|| {
-                    compat::compat_solve(
-                        &m.view(),
-                        &r.view(),
-                        false,
-                        false,
-                        false,
-                        true,
-                        None,
-                        false,
-                    )
-                    .expect("Operation failed")
-                })
+                b.iter(|| compat::compat_solve(&m.view(), &r.view()).expect("Operation failed"))
             },
         );
 
@@ -376,22 +306,19 @@ fn bench_linear_solvers(c: &mut Criterion) {
         // Least squares (overdetermined system)
         if size >= 20 {
             let overdetermined = matrix.slice(scirs2_core::ndarray::s![.., ..]).to_owned(); // Use full matrix
-            let overdetermined_rhs = create_test_vector(size).insert_axis(Axis(1));
+            let overdetermined_rhs = create_test_vector(size);
 
             group.bench_with_input(
                 BenchmarkId::new("lstsq_compat", size),
                 &(&overdetermined, &overdetermined_rhs),
                 |b, (m, r)| {
-                    b.iter(|| {
-                        compat::lstsq(&m.view(), &r.view(), None, false, false, true, None)
-                            .expect("Operation failed")
-                    })
+                    b.iter(|| compat::lstsq(&m.view(), &r.view()).expect("Operation failed"))
                 },
             );
 
             group.bench_with_input(
                 BenchmarkId::new("lstsq_basic", size),
-                &(&overdetermined, &overdetermined_rhs.column(0).to_owned()),
+                &(&overdetermined, &overdetermined_rhs),
                 |b, (m, r)| b.iter(|| lstsq(&m.view(), &r.view(), None).expect("Operation failed")),
             );
         }
@@ -415,7 +342,7 @@ fn benchmatrix_functions(c: &mut Criterion) {
 
         // Matrix exponential
         group.bench_with_input(BenchmarkId::new("expm_compat", size), &matrix, |b, m| {
-            b.iter(|| compat::expm(&m.view(), None).expect("Operation failed"))
+            b.iter(|| compat::expm(&m.view()).expect("Operation failed"))
         });
 
         group.bench_with_input(BenchmarkId::new("expm_basic", size), &matrix, |b, m| {
@@ -424,7 +351,7 @@ fn benchmatrix_functions(c: &mut Criterion) {
 
         // Matrix square root
         group.bench_with_input(BenchmarkId::new("sqrtm_compat", size), &matrix, |b, m| {
-            b.iter(|| compat::sqrtm(&m.view(), Some(true)).expect("Operation failed"))
+            b.iter(|| compat::sqrtm(&m.view()).expect("Operation failed"))
         });
 
         group.bench_with_input(BenchmarkId::new("sqrtm_basic", size), &matrix, |b, m| {
@@ -459,7 +386,7 @@ fn benchmatrix_properties(c: &mut Criterion) {
 
         // Condition number
         group.bench_with_input(BenchmarkId::new("cond_compat", size), &matrix, |b, m| {
-            b.iter(|| compat::cond(&m.view(), Some("2")).expect("Operation failed"))
+            b.iter(|| compat::cond(&m.view()).expect("Operation failed"))
         });
 
         group.bench_with_input(BenchmarkId::new("cond_basic", size), &matrix, |b, m| {
@@ -468,7 +395,7 @@ fn benchmatrix_properties(c: &mut Criterion) {
 
         // Matrix rank
         group.bench_with_input(BenchmarkId::new("rank_compat", size), &matrix, |b, m| {
-            b.iter(|| compat::matrix_rank(&m.view(), None, false, true).expect("Operation failed"))
+            b.iter(|| compat::matrix_rank(&m.view(), None).expect("Operation failed"))
         });
 
         group.bench_with_input(BenchmarkId::new("rank_basic", size), &matrix, |b, m| {
@@ -478,7 +405,7 @@ fn benchmatrix_properties(c: &mut Criterion) {
         // Pseudoinverse (smaller sizes)
         if size <= 50 {
             group.bench_with_input(BenchmarkId::new("pinv_compat", size), &matrix, |b, m| {
-                b.iter(|| compat::pinv(&m.view(), None, false, true).expect("Operation failed"))
+                b.iter(|| compat::pinv(&m.view()).expect("Operation failed"))
             });
         }
     }
@@ -499,16 +426,16 @@ fn bench_advanced_decompositions(c: &mut Criterion) {
 
         // RQ decomposition
         group.bench_with_input(BenchmarkId::new("rq_compat", size), &matrix, |b, m| {
-            b.iter(|| compat::rq(&m.view(), false, None, "full", true).expect("Operation failed"))
+            b.iter(|| compat::rq(&m.view()).expect("Operation failed"))
         });
 
         // Polar decomposition
         group.bench_with_input(BenchmarkId::new("polar_right", size), &matrix, |b, m| {
-            b.iter(|| compat::polar(&m.view(), "right").expect("Operation failed"))
+            b.iter(|| compat::polar(&m.view()).expect("Operation failed"))
         });
 
         group.bench_with_input(BenchmarkId::new("polar_left", size), &matrix, |b, m| {
-            b.iter(|| compat::polar(&m.view(), "left").expect("Operation failed"))
+            b.iter(|| compat::polar(&m.view()).expect("Operation failed"))
         });
     }
 
@@ -525,15 +452,14 @@ fn bench_utility_functions(c: &mut Criterion) {
         let blocks: Vec<Array2<f64>> = (0..num_blocks)
             .map(|i| create_testmatrix(blocksize + i % 3)) // Varying block sizes
             .collect();
-        let block_views: Vec<_> = blocks.iter().map(|b| b.view()).collect();
 
         let total_elements = blocks.iter().map(|b| b.len()).sum::<usize>();
         group.throughput(Throughput::Elements(total_elements as u64));
 
         group.bench_with_input(
             BenchmarkId::new("block_diag", num_blocks),
-            &block_views,
-            |b, blocks| b.iter(|| compat::block_diag(blocks).expect("Operation failed")),
+            &blocks,
+            |b, blocks| b.iter(|| compat::block_diag(blocks)),
         );
     }
 
@@ -561,7 +487,7 @@ fn bench_memory_allocation(c: &mut Criterion) {
             |b, m| {
                 b.iter(|| {
                     let _temp = m.clone(); // Simulate allocation
-                    compat::det(&m.view(), false, true).expect("Operation failed")
+                    compat::det(&m.view()).expect("Operation failed")
                 })
             },
         );
@@ -585,22 +511,18 @@ fn bench_scalability(c: &mut Criterion) {
 
         // Test determinant scaling
         group.bench_with_input(BenchmarkId::new("det_scaling", size), &matrix, |b, m| {
-            b.iter(|| compat::det(&m.view(), false, true).expect("Operation failed"))
+            b.iter(|| compat::det(&m.view()).expect("Operation failed"))
         });
 
         // Test norm scaling
         group.bench_with_input(BenchmarkId::new("norm_scaling", size), &matrix, |b, m| {
-            b.iter(|| {
-                compat::norm(&m.view(), Some("fro"), None, false, true).expect("Operation failed")
-            })
+            b.iter(|| compat::norm(&m.view(), Some("fro")).expect("Operation failed"))
         });
 
         // Test LU scaling (up to size 100)
         if size <= 100 {
             group.bench_with_input(BenchmarkId::new("lu_scaling", size), &matrix, |b, m| {
-                b.iter(|| {
-                    compat::lu(&m.view(), false, false, true, false).expect("Operation failed")
-                })
+                b.iter(|| compat::lu(&m.view()).expect("Operation failed"))
             });
         }
     }

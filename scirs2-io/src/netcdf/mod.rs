@@ -859,12 +859,9 @@ impl NetCDFFile {
     ///
     /// * `Result<ArrayD<f64>>` - The data array
     pub fn read_array(&self, name: &str) -> Result<ArrayD<f64>> {
-        if self.hdf5_backend.is_some() {
+        if let Some(backend) = &self.hdf5_backend {
             // For HDF5 backend, directly read the dataset
-            self.hdf5_backend
-                .as_ref()
-                .expect("Operation failed")
-                .read_dataset(name)
+            backend.read_dataset(name)
         } else {
             // Fall back to read_variable for Classic format
             self.read_variable::<f64>(name)

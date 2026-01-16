@@ -35,7 +35,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! scirs2-vision = "0.1.0"
+//! scirs2-vision = "0.1.2"
 //! ```
 //!
 //! ### Feature Detection (Harris Corners)
@@ -262,7 +262,7 @@
 //!
 //! ## 🔒 Version
 //!
-//! Current version: **0.1.0** (Released December 29, 2025)
+//! Current version: **0.1.2** (Released January 15, 2026)
 
 #![warn(missing_docs)]
 

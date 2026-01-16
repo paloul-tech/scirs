@@ -1,8 +1,8 @@
 //! High-Performance FFT Optimizations
 //!
-//! This module provides highly optimized FFT implementations that aim to match
-//! or exceed FFTW performance. It includes SIMD optimizations, cache-efficient
-//! algorithms, and other performance enhancements.
+//! This module provides highly optimized FFT implementations with SIMD optimizations,
+//! cache-efficient algorithms, and other performance enhancements. Use OxiFFT backend
+//! for FFTW-comparable Pure Rust FFT performance.
 
 use crate::error::{FFTError, FFTResult};
 use crate::fft::{fft, ifft};
@@ -117,7 +117,7 @@ impl Default for OptimizedConfig {
     }
 }
 
-/// FFTW-like optimized FFT implementation
+/// Optimized FFT implementation with OxiFFT-level performance
 pub struct OptimizedFFT {
     /// Configuration
     config: OptimizedConfig,

@@ -1,7 +1,7 @@
 //! Fast Fourier Transform operations for spectral methods
 //!
 //! This module provides FFT operations for 2D and 3D arrays using simplified DFT implementations.
-//! In practice, optimized FFT libraries like FFTW would be used for better performance.
+//! For production use, consider using scirs2-fft with OxiFFT backend for high-performance Pure Rust FFT.
 
 use crate::error::IntegrateResult;
 use scirs2_core::ndarray::{Array2, Array3};
@@ -17,14 +17,14 @@ impl FFTOperations {
     /// Forward 2D FFT (simplified implementation)
     ///
     /// This is a simplified FFT implementation using DFT for demonstration.
-    /// In practice, would use optimized FFT library like FFTW.
+    /// For production use, use scirs2-fft with OxiFFT backend.
     #[allow(dead_code)]
     pub fn fft_2d_forward(field: &Array2<f64>) -> FFTResult<Array2<Complex<f64>>> {
         let (nx, ny) = field.dim();
         let mut result = Array2::zeros((nx, ny));
 
         // Simplified FFT implementation using DFT for demonstration
-        // In practice, would use optimized FFT library like FFTW
+        // For production use, use scirs2-fft with OxiFFT backend
         for kx in 0..nx {
             for ky in 0..ny {
                 let mut sum = Complex::new(0.0, 0.0);
@@ -79,7 +79,7 @@ impl FFTOperations {
     /// Forward 3D FFT (simplified implementation)
     ///
     /// This is a simplified 3D FFT implementation using DFT for demonstration.
-    /// In practice, would use optimized FFT library like FFTW.
+    /// For production use, use scirs2-fft with OxiFFT backend.
     #[allow(dead_code)]
     pub fn fft_3d_forward(field: &Array3<f64>) -> FFTResult<Array3<Complex<f64>>> {
         let (nx, ny, nz) = field.dim();

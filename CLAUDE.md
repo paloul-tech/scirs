@@ -314,12 +314,12 @@ The project uses GitHub Actions with:
 - Comprehensive test coverage
 
 ## Version Information
-- Current version: 0.1.1 (Stable Release)
-- Release date: December 30, 2025
+- Current version: 0.1.2 (Performance & Pure Rust Release)
+- Release date: January 15, 2026
 - Repository: https://github.com/cool-japan/scirs
 - Main branch: master
 - ML Optimization: Independent [OptiRS](https://github.com/cool-japan/optirs) project
 - SciRS2 POLICY: ✅ **COMPLETE** - All 23 crates compliant (v0.1.0 Stable)
 - Python Bindings: scirs2-python with PyO3 integration
 - Documentation: Comprehensive updates for production readiness
-- Code Quality: 11,416 tests passing, zero warnings policy compliance
+- Code Quality: 11,400+ tests passing, zero warnings policy compliance

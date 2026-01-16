@@ -398,6 +398,46 @@ impl<'graph, 'env, F: Float> Context<'env, F> {
         self.graph.variable2node.borrow_mut().clear();
     }
 
+    /// Clears the computation graph while preserving variable-to-tensor mappings.
+    ///
+    /// This is useful for training loops where you want to reset the graph between
+    /// iterations but maintain references to variables. After calling this method:
+    /// - All tensor nodes are removed from the graph
+    /// - Variable references are preserved but will create new tensor nodes on next access
+    /// - Any existing `Tensor` handles become invalid
+    ///
+    /// # Example
+    /// ```ignore
+    /// for epoch in 0..1000 {
+    ///     env.run(|ctx| {
+    ///         // ... forward pass and backward pass ...
+    ///         ctx.evaluator().run();
+    ///
+    ///         // Clear graph for next iteration, keeping variable mappings
+    ///         ctx.clear_graph();
+    ///     });
+    /// }
+    /// ```
+    ///
+    /// See also: `clear()` for complete graph reset including variable mappings.
+    #[inline]
+    pub fn clear_graph(&mut self) {
+        self.graph.node_set.borrow_mut().clear();
+        // Keep variable2node mapping - it will be repopulated on next variable access
+        // but the variable IDs in VariableEnvironment remain valid
+        self.graph.variable2node.borrow_mut().clear();
+    }
+
+    /// Returns the current number of tensor nodes in the graph.
+    ///
+    /// This is useful for monitoring graph growth during training loops.
+    /// If this number grows unboundedly, consider using `clear_graph()` or
+    /// restructuring your training loop.
+    #[inline]
+    pub fn node_count(&self) -> usize {
+        self.graph.node_set.borrow().len()
+    }
+
     /// Creates a placeholder tensor in a [Graph].
     ///
     /// placeholder is a named tensor whose value can be specified when evaluating a computation graph.

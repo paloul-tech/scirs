@@ -476,7 +476,7 @@ impl IntegrationTestRunner {
             ("scirs2-linalg", "blas") => true,
             ("scirs2-linalg", "lapack") => true,
             ("scirs2-stats", "distributions") => true,
-            ("scirs2-fft", "fftw") => false, // Assume FFTW not available
+            ("scirs2-fft", "oxifft") => true, // OxiFFT Pure Rust backend available
             ("scirs2-signal", "scipy_compat") => true,
             _ => true,
         };

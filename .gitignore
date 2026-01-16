@@ -74,7 +74,7 @@ wheels/
 .installed.cfg
 *.egg
 **/.claude/settings.local.json
-
+**/CLAUDE.md
 **/CLAUDE.local.md
 scirs2-core/audit_logs/audit_*.log
 scirs2-core/example.bin

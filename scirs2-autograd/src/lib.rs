@@ -24,7 +24,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! scirs2-autograd = { version = "0.1.0", features = ["blas"] }
+//! scirs2-autograd = { version = "0.1.2", features = ["blas"] }
 //! ```
 //!
 //! ### BLAS Acceleration (Recommended)
@@ -33,7 +33,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! scirs2-autograd = { version = "0.1.0", features = ["blas", "openblas"] }
+//! scirs2-autograd = { version = "0.1.2", features = ["blas", "openblas"] }
 //! ```
 //!
 //! Available BLAS implementations:
@@ -311,7 +311,7 @@
 //!
 //! ## 🔒 Version
 //!
-//! Current version: **0.1.0** (Released December 29, 2025)
+//! Current version: **0.1.2** (Released January 15, 2026)
 
 #[allow(unused_imports)]
 // Re-export from scirs2-core for POLICY compliance
@@ -446,3 +446,6 @@ pub use crate::high_performance::{
 pub use crate::variable::{
     AutogradTensor, SafeVariable, SafeVariableEnvironment, VariableEnvironment,
 };
+
+// Re-export functional optimizers and training utilities (Issue #94)
+pub use crate::optimizers::{FunctionalAdam, FunctionalOptimizer, FunctionalSGD};

@@ -5,9 +5,34 @@
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use pyo3::types::{PyAny, PyDict};
-use scirs2_numpy::{PyArray1, PyArray2, PyArrayMethods};
+use scirs2_numpy::{PyArray1, PyArrayMethods};
 
 use super::types::{PyBeta, PyBinomial, PyCauchy, PyChiSquare, PyExponential, PyF, PyGamma, PyGeometric, PyLaplace, PyLogistic, PyLognormal, PyNormal, PyPareto, PyPoisson, PyStudentT, PyUniform, PyWeibull};
+
+// Import functions from other modules for register_module
+use super::functions::{
+    describe_py, mean_py, std_py, var_py, percentile_py, correlation_py,
+    covariance_py, median_py, iqr_py, ttest_1samp_py, ttest_ind_py,
+};
+use super::functions_2::{
+    ttest_rel_py, skew_py, kurtosis_py, mode_py, gmean_py, hmean_py, zscore_py,
+    mean_abs_deviation_py, median_abs_deviation_py, data_range_py, coef_variation_py,
+    gini_coefficient_py, boxplot_stats_py, quartiles_py, winsorized_mean_py,
+    winsorized_variance_py, entropy_py, kl_divergence_py, cross_entropy_py,
+    weighted_mean_py, moment_py, quintiles_py, skewness_ci_py, kurtosis_ci_py,
+};
+use super::functions_3::{
+    deciles_py, sem_py, percentile_range_py, skewness_simd_py, kurtosis_simd_py,
+    pearson_r_simd_py, covariance_simd_py, moment_simd_py, mean_simd_py, std_simd_py,
+    variance_simd_py, shapiro_py, chisquare_py, f_oneway_py, wilcoxon_py, mannwhitneyu_py,
+    kruskal_py, levene_py, bartlett_test_py, brown_forsythe_py, anderson_darling_py,
+    dagostino_k2_py,
+};
+use super::functions_4::{
+    ks_2samp_py, friedman_py, chi2_independence_py, chi2_yates_py, fisher_exact_py,
+    odds_ratio_py, relative_risk_py, linregress_py, tukey_hsd_py, pearsonr_py, spearmanr_py,
+};
+use scirs2_stats::kendalltau;
 
 /// Kendall tau rank correlation coefficient with significance test.
 ///

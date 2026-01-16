@@ -79,7 +79,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-scirs2-integrate = "0.1.0"
+scirs2-integrate = "0.1.2"
 ndarray = "0.16.1"
 ```
 
@@ -89,7 +89,7 @@ Enable optional features for enhanced performance:
 
 ```toml
 [dependencies]
-scirs2-integrate = { version = "0.1.0", features = ["simd", "parallel"] }
+scirs2-integrate = { version = "0.1.2", features = ["simd", "parallel"] }
 ```
 
 Available features:
@@ -385,7 +385,7 @@ Vectorized operations for better performance on modern CPUs:
 
 ```rust
 // Enable SIMD features in Cargo.toml:
-// scirs2-integrate = { version = "0.1.0", features = ["simd"] }
+// scirs2-integrate = { version = "0.1.2", features = ["simd"] }
 
 use scirs2_integrate::ode::utils::simd_ops;
 
@@ -898,7 +898,7 @@ For production deployments, we recommend:
 
 ```toml
 [dependencies]
-scirs2-integrate = { version = "0.1.0", features = ["parallel", "simd"] }
+scirs2-integrate = { version = "0.1.2", features = ["parallel", "simd"] }
 ```
 
 Enable all optimizations for maximum performance in production environments.

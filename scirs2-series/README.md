@@ -34,15 +34,15 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-scirs2-series = "0.1.0"
+scirs2-series = "0.1.2"
 ```
 
 **Recommended for Production**: Enable performance optimizations:
 
 ```toml
 [dependencies]
-scirs2-series = { version = "0.1.0", features = ["parallel", "simd"] }
-scirs2-core = { version = "0.1.0", features = ["parallel", "simd"] }
+scirs2-series = { version = "0.1.2", features = ["parallel", "simd"] }
+scirs2-core = { version = "0.1.2", features = ["parallel", "simd"] }
 ```
 
 **Available Features:**

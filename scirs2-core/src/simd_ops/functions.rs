@@ -489,4 +489,65 @@ pub trait SimdUnifiedOps: Sized + Copy + PartialOrd + Zero {
     fn simd_normalize(a: &ArrayView1<Self>) -> Array1<Self>;
     /// Standardization: (x - mean) / std
     fn simd_standardize(a: &ArrayView1<Self>) -> Array1<Self>;
+
+    // ============================================================================
+    // ZERO-ALLOCATION SIMD OPERATIONS (Phase 1: ToRSh SIMD Performance Fix)
+    // ============================================================================
+    // These methods write directly to pre-allocated output buffers, eliminating
+    // all intermediate allocations. Critical for achieving SIMD speedup in ToRSh.
+    //
+    // Design rationale:
+    // - Use raw slices (&[Self], &mut [Self]) instead of ArrayView for maximum efficiency
+    // - No intermediate Array1 allocation - writes directly to output
+    // - Enables ToRSh to reduce from 4 allocations to 1 per operation
+    // ============================================================================
+
+    /// Zero-allocation element-wise addition: output = a + b
+    ///
+    /// Writes SIMD addition results directly to pre-allocated output buffer.
+    /// This is the core operation for achieving SIMD speedup without allocation overhead.
+    ///
+    /// # Panics
+    /// Panics if `a`, `b`, and `output` do not have the same length.
+    ///
+    /// # Performance
+    /// - x86_64 AVX2: Processes 8 elements per cycle
+    /// - ARM64 NEON: Processes 4 elements per cycle
+    /// - Expected 2-4x speedup over scalar for large arrays (>1000 elements)
+    fn simd_add_into(a: &[Self], b: &[Self], output: &mut [Self]);
+
+    /// Zero-allocation element-wise subtraction: output = a - b
+    fn simd_sub_into(a: &[Self], b: &[Self], output: &mut [Self]);
+
+    /// Zero-allocation element-wise multiplication: output = a * b
+    ///
+    /// Writes SIMD multiplication results directly to pre-allocated output buffer.
+    fn simd_mul_into(a: &[Self], b: &[Self], output: &mut [Self]);
+
+    /// Zero-allocation element-wise division: output = a / b
+    fn simd_div_into(a: &[Self], b: &[Self], output: &mut [Self]);
+
+    /// In-place element-wise addition: a += b
+    ///
+    /// Modifies `a` in-place, adding corresponding elements from `b`.
+    /// Zero allocations, zero copies - pure SIMD operation.
+    fn simd_add_inplace(a: &mut [Self], b: &[Self]);
+
+    /// In-place element-wise subtraction: a -= b
+    fn simd_sub_inplace(a: &mut [Self], b: &[Self]);
+
+    /// In-place element-wise multiplication: a *= b
+    fn simd_mul_inplace(a: &mut [Self], b: &[Self]);
+
+    /// In-place element-wise division: a /= b
+    fn simd_div_inplace(a: &mut [Self], b: &[Self]);
+
+    /// In-place scalar addition: a += scalar
+    fn simd_add_scalar_inplace(a: &mut [Self], scalar: Self);
+
+    /// In-place scalar multiplication: a *= scalar
+    fn simd_mul_scalar_inplace(a: &mut [Self], scalar: Self);
+
+    /// Zero-allocation fused multiply-add: output = a * b + c
+    fn simd_fma_into(a: &[Self], b: &[Self], c: &[Self], output: &mut [Self]);
 }

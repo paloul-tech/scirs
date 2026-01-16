@@ -6,8 +6,12 @@ use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use pyo3::types::{PyAny, PyDict};
 use scirs2_numpy::{PyArray1, PyArray2, PyArrayMethods};
-use scirs2_core::{Array1, Array2, ndarray::ArrayView1};
-use scirs2_stats::tests::ttest::{ttest_1samp, ttest_ind, ttest_rel, Alternative};
+use scirs2_core::Array2;
+use scirs2_stats::{
+    ks_2samp, friedman, chi2_independence, chi2_yates, linregress, polyfit, tukey_hsd,
+    pearsonr, spearmanr,
+};
+use scirs2_stats::contingency::{fisher_exact, odds_ratio, relative_risk};
 
 /// Two-sample Kolmogorov-Smirnov test.
 ///
@@ -23,7 +27,7 @@ use scirs2_stats::tests::ttest::{ttest_1samp, ttest_ind, ttest_rel, Alternative}
 ///     Dictionary with 'statistic' and 'pvalue' keys
 #[pyfunction]
 #[pyo3(signature = (x, y, alternative = "two-sided"))]
-fn ks_2samp_py(
+pub fn ks_2samp_py(
     py: Python,
     x: &Bound<'_, PyArray1<f64>>,
     y: &Bound<'_, PyArray1<f64>>,
@@ -53,7 +57,7 @@ fn ks_2samp_py(
 /// Returns:
 ///     Dictionary with 'statistic' and 'pvalue' keys
 #[pyfunction]
-fn friedman_py(py: Python, data: &Bound<'_, PyArray2<f64>>) -> PyResult<Py<PyAny>> {
+pub fn friedman_py(py: Python, data: &Bound<'_, PyArray2<f64>>) -> PyResult<Py<PyAny>> {
     let data_readonly = data.readonly();
     let data_view = data_readonly.as_array();
     let data_arr = scirs2_core::ndarray::Array2::from_shape_vec(
@@ -81,7 +85,7 @@ fn friedman_py(py: Python, data: &Bound<'_, PyArray2<f64>>) -> PyResult<Py<PyAny
 /// Returns:
 ///     Dictionary with 'statistic', 'pvalue', 'df', and 'expected'
 #[pyfunction]
-fn chi2_independence_py(
+pub fn chi2_independence_py(
     py: Python,
     observed: &Bound<'_, PyArray2<i64>>,
 ) -> PyResult<Py<PyAny>> {
@@ -124,7 +128,7 @@ fn chi2_independence_py(
 /// Returns:
 ///     Dictionary with 'statistic', 'pvalue', 'df', and 'expected'
 #[pyfunction]
-fn chi2_yates_py(
+pub fn chi2_yates_py(
     py: Python,
     observed: &Bound<'_, PyArray2<i64>>,
 ) -> PyResult<Py<PyAny>> {
@@ -181,7 +185,7 @@ fn chi2_yates_py(
 ///     - pvalue: P-value for the test
 #[pyfunction]
 #[pyo3(signature = (table, alternative = "two-sided"))]
-fn fisher_exact_py(
+pub fn fisher_exact_py(
     py: Python,
     table: &Bound<'_, PyArray2<f64>>,
     alternative: &str,
@@ -222,7 +226,7 @@ fn fisher_exact_py(
 /// Returns:
 ///     Odds ratio value
 #[pyfunction]
-fn odds_ratio_py(table: &Bound<'_, PyArray2<f64>>) -> PyResult<f64> {
+pub fn odds_ratio_py(table: &Bound<'_, PyArray2<f64>>) -> PyResult<f64> {
     let table_readonly = table.readonly();
     let table_arr = Array2::from_shape_vec(
             table_readonly.as_array().dim(),
@@ -256,7 +260,7 @@ fn odds_ratio_py(table: &Bound<'_, PyArray2<f64>>) -> PyResult<f64> {
 /// Returns:
 ///     Relative risk value
 #[pyfunction]
-fn relative_risk_py(table: &Bound<'_, PyArray2<f64>>) -> PyResult<f64> {
+pub fn relative_risk_py(table: &Bound<'_, PyArray2<f64>>) -> PyResult<f64> {
     let table_readonly = table.readonly();
     let table_arr = Array2::from_shape_vec(
             table_readonly.as_array().dim(),
@@ -290,7 +294,7 @@ fn relative_risk_py(table: &Bound<'_, PyArray2<f64>>) -> PyResult<f64> {
 ///     - pvalue: Two-sided p-value for testing H₀: slope = 0
 ///     - stderr: Standard error of the slope estimate
 #[pyfunction]
-fn linregress_py(
+pub fn linregress_py(
     py: Python,
     x: &Bound<'_, PyArray1<f64>>,
     y: &Bound<'_, PyArray1<f64>>,
@@ -343,7 +347,7 @@ fn linregress_py(
 /// See /tmp/scirs2_session10_polyfit_issue.md for details
 #[allow(dead_code)]
 #[pyfunction]
-fn polyfit_py(
+pub fn polyfit_py(
     py: Python,
     x: &Bound<'_, PyArray1<f64>>,
     y: &Bound<'_, PyArray1<f64>>,
@@ -384,7 +388,7 @@ fn polyfit_py(
 ///     - significant: Whether the difference is significant at alpha level
 #[pyfunction]
 #[pyo3(signature = (*args, alpha = 0.05))]
-fn tukey_hsd_py(
+pub fn tukey_hsd_py(
     py: Python,
     args: &Bound<'_, pyo3::types::PyTuple>,
     alpha: f64,
@@ -430,7 +434,7 @@ fn tukey_hsd_py(
 ///     - pvalue: P-value for testing non-correlation
 #[pyfunction]
 #[pyo3(signature = (x, y, alternative = "two-sided"))]
-fn pearsonr_py(
+pub fn pearsonr_py(
     py: Python,
     x: &Bound<'_, PyArray1<f64>>,
     y: &Bound<'_, PyArray1<f64>>,
@@ -464,7 +468,7 @@ fn pearsonr_py(
 ///     - pvalue: P-value for testing non-correlation
 #[pyfunction]
 #[pyo3(signature = (x, y, alternative = "two-sided"))]
-fn spearmanr_py(
+pub fn spearmanr_py(
     py: Python,
     x: &Bound<'_, PyArray1<f64>>,
     y: &Bound<'_, PyArray1<f64>>,

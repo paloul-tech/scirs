@@ -41,7 +41,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-scirs2-metrics = "0.1.0"
+scirs2-metrics = "0.1.2"
 ```
 
 ### Feature Selection
@@ -51,13 +51,13 @@ Choose features based on your needs:
 ```toml
 [dependencies]
 # Default features (recommended for most users)
-scirs2-metrics = "0.1.0"
+scirs2-metrics = "0.1.2"
 
 # Minimal installation (core metrics only)
-scirs2-metrics = { version = "0.1.0", default-features = false }
+scirs2-metrics = { version = "0.1.2", default-features = false }
 
 # Full installation with all capabilities
-scirs2-metrics = { version = "0.1.0", features = ["neural_common", "optim_integration", "plotters_backend"] }
+scirs2-metrics = { version = "0.1.2", features = ["neural_common", "optim_integration", "plotters_backend"] }
 ```
 
 #### Available Features

@@ -85,7 +85,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-scirs2-text = "0.1.0"
+scirs2-text = "0.1.2"
 ```
 
 ## Quick Start

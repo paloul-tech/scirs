@@ -71,7 +71,7 @@ Add scirs2-linalg to your Cargo.toml:
 
 ```toml
 [dependencies]
-scirs2-linalg = "0.1.0"
+scirs2-linalg = "0.1.2"
 ndarray = "0.16.1"
 ```
 
@@ -79,10 +79,10 @@ For accelerated performance with OxiBLAS (Pure Rust BLAS/LAPACK):
 
 ```toml
 [dependencies]
-scirs2-linalg = { version = "0.1.1", features = ["linalg"] }
+scirs2-linalg = { version = "0.1.2", features = ["linalg"] }
 # OxiBLAS is automatically enabled with linalg feature (Pure Rust, no system dependencies)
 # SIMD acceleration available with simd feature
-scirs2-linalg = { version = "0.1.1", features = ["linalg", "simd"] }
+scirs2-linalg = { version = "0.1.2", features = ["linalg", "simd"] }
 ```
 
 **Note:** v0.1.0+ uses OxiBLAS (Pure Rust) instead of system BLAS libraries (OpenBLAS/MKL/Accelerate). No C/Fortran compiler or system libraries required.
@@ -297,10 +297,10 @@ println!("Memory Reduction: {:.1}%", (1.0 - 8.0/32.0) * 100.0);
 
 ```toml
 # OxiBLAS - Pure Rust implementation (default, all platforms)
-scirs2-linalg = { version = "0.1.1", features = ["linalg"] }
+scirs2-linalg = { version = "0.1.2", features = ["linalg"] }
 
 # With SIMD acceleration
-scirs2-linalg = { version = "0.1.1", features = ["linalg", "simd"] }
+scirs2-linalg = { version = "0.1.2", features = ["linalg", "simd"] }
 ```
 
 **Legacy backends (removed in v0.1.0):**

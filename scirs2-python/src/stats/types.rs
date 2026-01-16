@@ -4,6 +4,7 @@
 
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
+use scirs2_stats::{ContinuousDistribution, DiscreteDistribution};
 use scirs2_stats::distributions::normal::Normal as RustNormal;
 use scirs2_stats::distributions::binomial::Binomial as RustBinomial;
 use scirs2_stats::distributions::poisson::Poisson as RustPoisson;

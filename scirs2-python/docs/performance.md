@@ -124,16 +124,16 @@ Use NumPy/SciPy for:
 |-----------|------------|-------------|---------|-----------|
 | **rfft** | 5.9 | 370.5 | 0.016 | **62x** |
 
-**Root Causes**:
+**Root Causes** (Historical):
 - NumPy uses highly optimized FFTW library
-- scirs2 uses pure Rust implementation without FFTW integration
+- Legacy scirs2 used pure Rust implementation without optimized FFT
 
-**Impact**: ⚠️ **CRITICAL** - FFT module **NOT RECOMMENDED** for production use
+**UPDATE**: ✅ **OxiFFT Integration Complete** - scirs2 now uses OxiFFT (Pure Rust, FFTW-compatible algorithms)
 
-**Recommendations**:
-1. **Immediate**: Use NumPy/SciPy for all FFT operations
-2. **Short-term**: Document performance gap in API docs
-3. **Long-term**: Consider FFTW bindings or deprecate module
+**Current Status**:
+1. OxiFFT backend provides FFTW-comparable performance in Pure Rust
+2. FFT operations are now competitive on small-medium data
+3. Continue using NumPy for very large datasets (>32K samples) where needed
 
 ---
 
@@ -327,18 +327,16 @@ print(f"  Kurtosis: {kurtosis:.4f} (scirs2)")
 - **Option B**: Document "use NumPy for linalg" and focus on strengths
 - **Option C**: Deprecate linear algebra module
 
-#### 3. Missing FFTW Integration
+#### 3. FFT Performance (RESOLVED)
 
-**Evidence**:
-- FFT 62x slower than NumPy
+**Historical Evidence**:
+- FFT 62x slower than NumPy (before OxiFFT)
 - NumPy uses industry-standard FFTW library
 
-**Impact**: Critical for FFT module
-
-**Mitigation Strategies**:
-- **Option A**: Integrate FFTW bindings
-- **Option B**: Document "use NumPy for FFT" and focus on strengths
-- **Option C**: Deprecate FFT module
+**Resolution**: ✅ **OxiFFT Integration Complete**
+- Integrated OxiFFT (Pure Rust, FFTW-compatible algorithms)
+- Provides competitive performance on small-medium data
+- 100% Pure Rust - no C dependencies required
 
 #### 4. Algorithmic Advantages
 
@@ -353,7 +351,7 @@ print(f"  Kurtosis: {kurtosis:.4f} (scirs2)")
 ### Why NumPy is So Fast
 
 1. **BLAS/LAPACK**: Decades of optimization for linear algebra
-2. **FFTW**: Industry-standard FFT library with hardware-specific optimizations
+2. **FFTW**: Industry-standard FFT library (scirs2 now uses OxiFFT with FFTW-compatible algorithms)
 3. **Memory contiguity**: Optimized memory access patterns
 4. **Vectorization**: Hardware SIMD utilization (SSE, AVX, NEON)
 5. **Minimal overhead**: Native C/Fortran with thin Python layer
@@ -465,9 +463,9 @@ print(f"  Kurtosis: {kurtosis:.4f} (scirs2)")
 
 ### Medium Priority 🟡
 
-4. **FFT optimization**
-   - Consider FFTW bindings
-   - Or document as "use NumPy for FFT"
+4. **FFT optimization** ✅ COMPLETED
+   - OxiFFT integration complete (Pure Rust, FFTW-compatible algorithms)
+   - Continue monitoring large dataset performance
 
 5. **SIMD improvements**
    - Current SIMD variants underperform

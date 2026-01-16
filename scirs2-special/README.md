@@ -54,7 +54,7 @@ Add this production-ready crate to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-scirs2-special = "0.1.0"
+scirs2-special = "0.1.2"
 ```
 
 ### Recommended Configuration
@@ -63,7 +63,7 @@ For optimal performance in production applications:
 
 ```toml
 [dependencies]
-scirs2-special = { version = "0.1.0", features = ["parallel"] }
+scirs2-special = { version = "0.1.2", features = ["parallel"] }
 ```
 
 ### Available Features
